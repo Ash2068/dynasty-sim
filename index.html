@@ -6,28 +6,51 @@
     <title>Dynasty & Discord v1.0</title>
     <link rel="stylesheet" href="style.css">
 </head>
-    
 <body>
     <div id="game-container">
         
         <div id="setup-screen" style="display:none; text-align:center;">
-            <h2 style="color:var(--accent);">A New Beginning</h2>
+            <h1 style="color:var(--accent); margin-bottom: 5px;">DYNASTY & DISCORD</h1>
+            <p style="font-size: 0.8rem; color: #888; margin-bottom: 20px;">v1.0 Public Release</p>
+
             <div class="sub-box">
-                <p>Identity: <span id="setup-name" style="font-weight:bold;">---</span></p>
-                <p>IQ Potential: <span id="setup-iq">---</span></p>
-                <button class="btn-ghost" onclick="rollStats()">🎲 Roll New Identity</button>
+                <label>Legal Name</label><br>
+                <input type="text" id="input-name" placeholder="Enter Name..." class="btn-ghost" style="width:80%; margin-top:10px; text-align:center;">
+                <br><br>
+                <button class="btn-ghost" onclick="rollStats()">🎲 Random Identity</button>
+            </div>
+
+            <div class="sub-box" style="display: flex; justify-content: space-around; gap: 10px;">
+                <div style="flex: 1;">
+                    <label>Gender</label><br>
+                    <select id="input-gender" class="btn-ghost" style="width: 100%; margin-top: 5px;">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Non-Binary">Non-Binary</option>
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <label>Origin</label><br>
+                    <select id="input-race" class="btn-ghost" style="width: 100%; margin-top: 5px;">
+                        <option value="Northan">Northan</option>
+                        <option value="Vanguard">Vanguard</option>
+                        <option value="Islander">Islander</option>
+                        <option value="Highlander">Highlander</option>
+                    </select>
+                </div>
             </div>
 
             <div class="sub-box">
-                <label>Select Starting Region:</label><br><br>
+                <label>Starting Region</label><br><br>
                 <select id="setup-country" class="btn-ghost" style="width:80%; height:40px;">
-                    <option value="USA">USA (Democracy - 20% Tax)</option>
-                    <option value="United Kingdom">UK (Monarchy - 25% Tax)</option>
-                    <option value="The Autocracy">Autocracy (Dictatorship - 50% Tax)</option>
-                    <option value="Sealand">Sealand (Micronation - 0% Tax)</option>
+                    <option value="United States">United States</option>
+                    <option value="United Kingdom">United Kingdom</option>
+                    <option value="The Autocracy">The Autocracy</option>
+                    <option value="Sealand">Sealand</option>
                 </select>
             </div>
-            <button class="btn-main" onclick="finalizeLife()">BEGIN LIFE</button>
+
+            <button class="btn-main" onclick="finalizeLife()" style="margin-top:20px;">BEGIN LEGACY</button>
         </div>
 
         <div id="main-ui" style="display:none;">
@@ -36,6 +59,7 @@
             </div>
 
             <div class="header">
+                <button class="btn-ghost" onclick="exitToHome()" style="border:none; font-size:1.2rem; padding:0; cursor:pointer;">🏠</button>
                 <h1><span id="char-name">Soul</span></h1>
                 <div class="money-display">Bank: <span id="val-money">0</span></div>
             </div>
@@ -64,6 +88,7 @@
             <div id="tab-main" class="tab-content">
                 <div class="info-row">Age: <span id="val-age">18</span> | IQ: <span id="val-iq">100</span></div>
                 <div class="info-row">Standing: <span id="val-standing">Commoner</span></div>
+                
                 <button class="btn-main" onclick="ageUp()">AGE UP (+1 Year)</button>
                 
                 <div id="retired-parent-info" style="display:none;" class="sub-box">
@@ -95,7 +120,6 @@
             </div>
 
             <div id="log">Welcome to the Dynasty. Your legacy starts now.</div>
-        </div> </div>
-    <script src="script.js"></script>
+        </div> </div> <script src="script.js"></script>
 </body>
 </html>
