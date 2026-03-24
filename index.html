@@ -8,95 +8,93 @@
 </head>
 <body>
     <div id="game-container">
+        
         <div id="setup-screen" style="display:none; text-align:center;">
-    <h2 style="color:var(--accent);">A New Beginning</h2>
-    <div class="sub-box">
-        <p>Identity: <span id="setup-name" style="font-weight:bold;">---</span></p>
-        <p>IQ Potential: <span id="setup-iq">---</span></p>
-        <button class="btn-ghost" onclick="rollStats()">🎲 Roll New Identity</button>
-    </div>
-
-    <div class="sub-box">
-        <label>Select Starting Region:</label><br><br>
-        <select id="setup-country" class="btn-ghost" style="width:80%; height:40px;">
-            <option value="USA">USA (Democracy - 20% Tax)</option>
-            <option value="United Kingdom">UK (Monarchy - 25% Tax)</option>
-            <option value="The Autocracy">Autocracy (Dictatorship - 50% Tax)</option>
-            <option value="Sealand">Sealand (Micronation - 0% Tax)</option>
-        </select>
-    </div>
-
-    <button class="btn-main" onclick="finalizeLife()">BEGIN LIFE</button>
-</div>
-
-<div id="main-ui" style="display:none;">
-    </div>
-        <div id="global-news-box" style="display:none;" class="news-box-info">
-            <p id="news-content">>> SYSTEM READY</p>
-        </div>
-
-        <div class="header">
-            <h1><span id="char-name">Soul</span></h1>
-            <div class="money-display">Bank: <span id="val-money">0</span></div>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-box">
-                <label>Health</label>
-                <div class="bar-bg"><div id="bar-health" class="bar-fill" style="background:#4ade80; width:100%;"></div></div>
-            </div>
-            <div class="stat-box">
-                <label>Mental</label>
-                <div class="bar-bg"><div id="bar-mental" class="bar-fill" style="background:#38bdf8; width:100%;"></div></div>
-            </div>
-            <div class="stat-box">
-                <label>Fame</label>
-                <div class="bar-bg"><div id="bar-fame" class="bar-fill" style="background:#f472b6; width:0%;"></div></div>
-            </div>
-        </div>
-
-        <div class="tab-nav">
-            <button onclick="showTab('main')">Life</button>
-            <button onclick="showTab('assets')">Assets</button>
-            <button onclick="showTab('world')">World</button>
-        </div>
-
-        <div id="tab-main" class="tab-content">
-            <div class="info-row">Age: <span id="val-age">18</span> | IQ: <span id="val-iq">100</span></div>
-            <div class="info-row">Standing: <span id="val-standing">Commoner</span></div>
-            
-            <button class="btn-main" onclick="ageUp()">AGE UP (+1 Year)</button>
-            
-            <div id="retired-parent-info" style="display:none;" class="sub-box">
-                <p>Parent: <span id="parent-name"></span> (Bond: <span id="val-rel">0</span>%)</p>
-                <button class="btn-ghost" onclick="visitParent()">🎁 Visit Parent ($1k)</button>
-                <button class="btn-ghost" onclick="passTheTorch()">👑 Pass the Torch</button>
-            </div>
-        </div>
-
-        <div id="tab-assets" class="tab-content" style="display:none;">
+            <h2 style="color:var(--accent);">A New Beginning</h2>
             <div class="sub-box">
-                <p>Private Items: <span id="private-count">0</span> | Family Vault: <span id="family-count">0</span></p>
-                <button class="btn-ghost" id="btn-challenge" onclick="challengeDynasty()" style="display:none;">⚖️ Sue Dynasty</button>
+                <p>Identity: <span id="setup-name" style="font-weight:bold;">---</span></p>
+                <p>IQ Potential: <span id="setup-iq">---</span></p>
+                <button class="btn-ghost" onclick="rollStats()">🎲 Roll New Identity</button>
             </div>
+
             <div class="sub-box">
-                <p>Stocks: <span id="val-stocks">$0</span></p>
-                <button class="btn-ghost" onclick="invest(5000)">Invest $5k</button>
-                <button class="btn-ghost" onclick="sellStocks()">Sell All</button>
+                <label>Select Starting Region:</label><br><br>
+                <select id="setup-country" class="btn-ghost" style="width:80%; height:40px;">
+                    <option value="USA">USA (Democracy - 20% Tax)</option>
+                    <option value="United Kingdom">UK (Monarchy - 25% Tax)</option>
+                    <option value="The Autocracy">Autocracy (Dictatorship - 50% Tax)</option>
+                    <option value="Sealand">Sealand (Micronation - 0% Tax)</option>
+                </select>
             </div>
+            <button class="btn-main" onclick="finalizeLife()">BEGIN LIFE</button>
         </div>
 
-        <div id="tab-world" class="tab-content" style="display:none;">
-            <div class="sub-box">
-                <p id="stability-text">Stability: Secure</p>
-                <div class="bar-bg" style="height:4px;"><div id="bar-stability" class="bar-fill" style="background:#fbbf24; width:100%;"></div></div>
+        <div id="main-ui" style="display:none;">
+            <div id="global-news-box" style="display:none;" class="news-box-info">
+                <p id="news-content">>> SYSTEM READY</p>
             </div>
-            <button class="btn-ghost" onclick="spreadPropaganda('Cult')">👁️ Start Cult</button>
-            <button class="btn-ghost" onclick="goDark()">🕶️ Bribe Police ($10k)</button>
-        </div>
 
-        <div id="log">Welcome to the Dynasty. Your legacy starts now.</div>
-    </div>
+            <div class="header">
+                <h1><span id="char-name">Soul</span></h1>
+                <div class="money-display">Bank: <span id="val-money">0</span></div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <label>Health</label>
+                    <div class="bar-bg"><div id="bar-health" class="bar-fill" style="background:#4ade80; width:100%;"></div></div>
+                </div>
+                <div class="stat-box">
+                    <label>Mental</label>
+                    <div class="bar-bg"><div id="bar-mental" class="bar-fill" style="background:#38bdf8; width:100%;"></div></div>
+                </div>
+                <div class="stat-box">
+                    <label>Fame</label>
+                    <div class="bar-bg"><div id="bar-fame" class="bar-fill" style="background:#f472b6; width:0%;"></div></div>
+                </div>
+            </div>
+
+            <div class="tab-nav">
+                <button onclick="showTab('main')">Life</button>
+                <button onclick="showTab('assets')">Assets</button>
+                <button onclick="showTab('world')">World</button>
+            </div>
+
+            <div id="tab-main" class="tab-content">
+                <div class="info-row">Age: <span id="val-age">18</span> | IQ: <span id="val-iq">100</span></div>
+                <div class="info-row">Standing: <span id="val-standing">Commoner</span></div>
+                <button class="btn-main" onclick="ageUp()">AGE UP (+1 Year)</button>
+                
+                <div id="retired-parent-info" style="display:none;" class="sub-box">
+                    <p>Parent: <span id="parent-name"></span> (Bond: <span id="val-rel">0</span>%)</p>
+                    <button class="btn-ghost" onclick="visitParent()">🎁 Visit Parent ($1k)</button>
+                    <button class="btn-ghost" onclick="passTheTorch()">👑 Pass the Torch</button>
+                </div>
+            </div>
+
+            <div id="tab-assets" class="tab-content" style="display:none;">
+                <div class="sub-box">
+                    <p>Private Items: <span id="private-count">0</span> | Family Vault: <span id="family-count">0</span></p>
+                    <button class="btn-ghost" id="btn-challenge" onclick="challengeDynasty()" style="display:none;">⚖️ Sue Dynasty</button>
+                </div>
+                <div class="sub-box">
+                    <p>Stocks: <span id="val-stocks">$0</span></p>
+                    <button class="btn-ghost" onclick="invest(5000)">Invest $5k</button>
+                    <button class="btn-ghost" onclick="sellStocks()">Sell All</button>
+                </div>
+            </div>
+
+            <div id="tab-world" class="tab-content" style="display:none;">
+                <div class="sub-box">
+                    <p id="stability-text">Stability: Secure</p>
+                    <div class="bar-bg" style="height:4px;"><div id="bar-stability" class="bar-fill" style="background:#fbbf24; width:100%;"></div></div>
+                </div>
+                <button class="btn-ghost" onclick="spreadPropaganda('Cult')">👁️ Start Cult</button>
+                <button class="btn-ghost" onclick="goDark()">🕶️ Bribe Police ($10k)</button>
+            </div>
+
+            <div id="log">Welcome to the Dynasty. Your legacy starts now.</div>
+        </div> </div>
     <script src="script.js"></script>
 </body>
 </html>
