@@ -8,6 +8,29 @@
 </head>
 <body>
     <div id="game-container">
+        <div id="setup-screen" style="display:none; text-align:center;">
+    <h2 style="color:var(--accent);">A New Beginning</h2>
+    <div class="sub-box">
+        <p>Identity: <span id="setup-name" style="font-weight:bold;">---</span></p>
+        <p>IQ Potential: <span id="setup-iq">---</span></p>
+        <button class="btn-ghost" onclick="rollStats()">🎲 Roll New Identity</button>
+    </div>
+
+    <div class="sub-box">
+        <label>Select Starting Region:</label><br><br>
+        <select id="setup-country" class="btn-ghost" style="width:80%; height:40px;">
+            <option value="USA">USA (Democracy - 20% Tax)</option>
+            <option value="United Kingdom">UK (Monarchy - 25% Tax)</option>
+            <option value="The Autocracy">Autocracy (Dictatorship - 50% Tax)</option>
+            <option value="Sealand">Sealand (Micronation - 0% Tax)</option>
+        </select>
+    </div>
+
+    <button class="btn-main" onclick="finalizeLife()">BEGIN LIFE</button>
+</div>
+
+<div id="main-ui" style="display:none;">
+    </div>
         <div id="global-news-box" style="display:none;" class="news-box-info">
             <p id="news-content">>> SYSTEM READY</p>
         </div>
