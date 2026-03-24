@@ -8,6 +8,21 @@
     --text: #f1f5f9;
 }
 
+select.btn-ghost {
+    background: var(--card);
+    color: var(--accent);
+    padding: 10px;
+    border: 1px solid var(--accent);
+    appearance: none; /* Removes default arrow for a cleaner look */
+    text-align: center;
+    cursor: pointer;
+}
+
+select.btn-ghost option {
+    background: var(--bg);
+    color: var(--text);
+}
+
 body {
     background: var(--bg);
     color: var(--text);
