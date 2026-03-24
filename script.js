@@ -4,17 +4,17 @@ let familyVault = JSON.parse(localStorage.getItem('dynasty_family_vault')) || []
 let userStocks = 0;
 let heat = 0;
 let stability = 100;
-let tempLife = {}; // Temporary object to hold rolled stats
+let tempLife = {}; 
 
 // --- INITIALIZATION ---
 function initGame() {
     const saved = localStorage.getItem('dynasty_current');
     if (saved) {
         p = JSON.parse(saved);
-        showUI('main'); // Jump straight to the game
+        showUI('main');
     } else {
-        showUI('setup'); // Show the character creator
-        rollStats();     // Auto-roll the first one
+        showUI('setup');
+        rollStats(); // Pre-rolls hidden stats like IQ
     }
     updateUI();
 }
@@ -34,30 +34,44 @@ function showUI(screen) {
 
 // --- CHARACTER CREATION ---
 function rollStats() {
-    tempLife = {
-        name: "Soul_" + Math.floor(Math.random() * 9999),
-        iq: 90 + Math.floor(Math.random() * 70),
-        looks: 50 + Math.floor(Math.random() * 50)
-    };
+    // Generate a random name for the input box
+    const first = ["Aris", "Kael", "Lyra", "Sora", "Jax", "Vera"];
+    const last = ["Thorne", "Vance", "Nova", "Steel", "Echo"];
+    const randomName = first[Math.floor(Math.random()*first.length)] + " " + last[Math.floor(Math.random()*last.length)];
     
-    document.getElementById('setup-name').innerText = tempLife.name;
-    document.getElementById('setup-iq').innerText = tempLife.iq;
+    document.getElementById('input-name').value = randomName;
+
+    // Roll hidden stats that the user doesn't pick
+    tempLife = {
+        iq: 85 + Math.floor(Math.random() * 75),
+        looks: 40 + Math.floor(Math.random() * 60)
+    };
 }
 
 function finalizeLife() {
-    const selectedCountry = document.getElementById('setup-country').value;
-    
+    const nameVal = document.getElementById('input-name').value;
+    const genderVal = document.getElementById('input-gender').value;
+    const raceVal = document.getElementById('input-race').value;
+    const countryVal = document.getElementById('setup-country').value;
+
+    if (!nameVal) {
+        alert("Please enter a name for your legacy.");
+        return;
+    }
+
     p = {
-        ...tempLife,
+        name: nameVal,
+        gender: genderVal,
+        race: raceVal,
+        country: countryVal,
+        iq: tempLife.iq || 100,
         age: 18,
-        money: 1500, 
+        money: 1500,
         health: 100,
         mentalHealth: 100,
         fame: 0,
         standing: "Commoner",
-        country: selectedCountry,
         isBlackSheep: false,
-        privateVault: [],
         newsTimer: 0,
         alive: true
     };
@@ -65,7 +79,20 @@ function finalizeLife() {
     save();
     showUI('main');
     updateUI();
-    updateLog(`A new life begins in ${selectedCountry}.`);
+    updateLog(`${p.name} (${p.race}) has arrived in ${p.country}.`);
+}
+
+// --- NAVIGATION & UTILITY ---
+function exitToHome() {
+    if (confirm("Exit to Main Menu? Your current life will be deleted, but the Family Vault remains.")) {
+        localStorage.removeItem('dynasty_current');
+        location.reload();
+    }
+}
+
+function showTab(id) {
+    document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+    document.getElementById('tab-' + id).style.display = 'block';
 }
 
 // --- CORE GAMEPLAY ---
@@ -76,45 +103,18 @@ function ageUp() {
     p.money += 2500; 
     p.health -= (p.age > 60) ? 4 : 1;
     
-    // 1. Market & Economy
     if (userStocks > 0) {
         let trend = (0.8 + Math.random() * 0.5);
         userStocks = Math.floor(userStocks * trend);
-        if (trend < 0.9) updateLog("Market Downturn: Portfolio value dropped.");
     }
 
-    // 2. World Stability
-    stability -= Math.random() * 4;
-    if (stability < 35) triggerGlobalNews("POLITICAL UNREST: Protests in the streets!", "war");
-    if (stability < 10) {
-        p.money = Math.floor(p.money * 0.5);
-        stability = 50;
-        triggerGlobalNews("CIVIL WAR: Savings seized by state!", "war");
+    stability -= Math.random() * 3;
+    if (stability < 15) {
+        p.money = Math.floor(p.money * 0.7);
+        triggerGlobalNews("ECONOMIC CRASH: Currency devalued!", "war");
+        stability = 40;
     }
 
-    // 3. Parent/Dynasty Logic
-    if (retired_parent) {
-        retired_parent.health -= 5;
-        retired_parent.relationship -= 2;
-        
-        if (retired_parent.relationship <= 0 && !p.isBlackSheep) {
-            p.isBlackSheep = true;
-            updateLog("DISOWNED: You have been cut off from the family vault.");
-        }
-        
-        if (retired_parent.health <= 0) {
-            let legacy = 50000;
-            if (!p.isBlackSheep) {
-                p.money += legacy;
-                updateLog(`INHERITANCE: Received $${legacy.toLocaleString()} from your parent.`);
-            } else {
-                updateLog("LEGACY LOST: Your parent passed away, but you were disowned.");
-            }
-            retired_parent = null;
-        }
-    }
-
-    if (heat > 0) heat -= 5;
     if (p.health <= 0) die();
     
     if (p.newsTimer > 0) p.newsTimer--; 
@@ -124,60 +124,19 @@ function ageUp() {
     save();
 }
 
-// --- ACTIONS ---
-function invest(amt) {
-    if (p.money >= amt) {
-        p.money -= amt;
-        userStocks += amt;
-        updateLog(`INVESTED: $${amt.toLocaleString()} in Global Index.`);
-    } else {
-        updateLog("INSUFFICIENT FUNDS.");
-    }
-    updateUI();
-}
-
-function sellStocks() {
-    p.money += userStocks;
-    updateLog(`LIQUIDATED: Sold stocks for $${userStocks.toLocaleString()}`);
-    userStocks = 0;
-    updateUI();
-}
-
-function spreadPropaganda(type) {
-    p.fame += 15;
-    heat += 20;
-    if (type === 'Cult') p.standing = "Cult Leader";
-    if (heat > 75) {
-        let fine = Math.floor(p.money * 0.2);
-        p.money -= fine;
-        heat = 10;
-        updateLog(`POLICE RAID: Fined $${fine.toLocaleString()}.`);
-    }
-    updateUI();
-}
-
-function goDark() {
-    if (p.money >= 10000) {
-        p.money -= 10000;
-        heat = 0;
-        updateLog("BRIBED: Police interest has vanished.");
-    }
-    updateUI();
-}
-
 // --- SYSTEM ---
 function triggerGlobalNews(msg, type) {
     const box = document.getElementById('global-news-box');
     box.className = `news-box-${type}`;
     document.getElementById('news-content').innerText = ">> " + msg;
     box.style.display = "block";
-    p.newsTimer = 5;
+    p.newsTimer = 4;
 }
 
 function die() {
     p.alive = false;
-    alert("The Character has died. Succession starting...");
-    localStorage.removeItem('dynasty_current'); // Clear current to trigger setup screen
+    alert("Your character has passed away.");
+    localStorage.removeItem('dynasty_current');
     location.reload();
 }
 
@@ -187,7 +146,7 @@ function save() {
 }
 
 function updateUI() {
-    if (!p.name) return; // Prevent errors if p is empty
+    if (!p.name) return;
     document.getElementById('char-name').innerText = p.name;
     document.getElementById('val-money').innerText = p.money.toLocaleString();
     document.getElementById('val-age').innerText = p.age;
@@ -200,14 +159,6 @@ function updateUI() {
     
     document.getElementById('val-stocks').innerText = "$" + userStocks.toLocaleString();
     document.getElementById('bar-stability').style.width = stability + "%";
-
-    const challengeBtn = document.getElementById('btn-challenge');
-    if (challengeBtn) challengeBtn.style.display = p.isBlackSheep ? 'block' : 'none';
-}
-
-function showTab(id) {
-    document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
-    document.getElementById('tab-' + id).style.display = 'block';
 }
 
 function updateLog(msg) {
