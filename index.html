@@ -3,123 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynasty & Discord v1.0</title>
+    <title>Dynasty & Discord | Life Sim</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
+
+<div id="game-container">
+    
+    <div id="setup-screen">
+        <h1>DYNASTY & DISCORD</h1>
+        <button id="btn-archive" class="btn-ghost" style="display:none; margin-bottom: 20px;" onclick="openArchive()">📜 View Archives</button>
         
-        <div id="setup-screen" style="display:none; text-align:center;">
-            <h1 style="color:var(--accent); margin-bottom: 5px;">DYNASTY & DISCORD</h1>
-            <p style="font-size: 0.8rem; color: #888; margin-bottom: 20px;">v1.0 Public Release</p>
-
-            <div class="sub-box">
-                <label>Legal Name</label><br>
-                <input type="text" id="input-name" placeholder="Enter Name..." class="btn-ghost" style="width:80%; margin-top:10px; text-align:center;">
-                <br><br>
-                <button class="btn-ghost" onclick="rollStats()">🎲 Random Identity</button>
-            </div>
-
-            <div class="sub-box" style="display: flex; justify-content: space-around; gap: 10px;">
-                <div style="flex: 1;">
-                    <label>Gender</label><br>
-                    <select id="input-gender" class="btn-ghost" style="width: 100%; margin-top: 5px;">
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Non-Binary">Non-Binary</option>
-                    </select>
-                </div>
-                <div style="flex: 1;">
-                    <label>Origin</label><br>
-                    <select id="input-race" class="btn-ghost" style="width: 100%; margin-top: 5px;">
-                        <option value="Northan">Northan</option>
-                        <option value="Vanguard">Vanguard</option>
-                        <option value="Islander">Islander</option>
-                        <option value="Highlander">Highlander</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="sub-box">
-                <label>Starting Region</label><br><br>
-                <select id="setup-country" class="btn-ghost" style="width:80%; height:40px;">
-                    <option value="United States">United States</option>
-                    <option value="United Kingdom">United Kingdom</option>
-                    <option value="The Autocracy">The Autocracy</option>
-                    <option value="Sealand">Sealand</option>
-                </select>
-            </div>
-
-            <button class="btn-main" onclick="finalizeLife()" style="margin-top:20px;">BEGIN LEGACY</button>
+        <div class="sub-box">
+            <label>Full Name</label>
+            <input type="text" id="input-name" class="btn-ghost" placeholder="Enter Name...">
+            <button class="btn-ghost" onclick="rollStats()">🎲 Random Identity</button>
         </div>
 
-        <div id="main-ui" style="display:none;">
-            <div id="global-news-box" style="display:none;" class="news-box-info">
-                <p id="news-content">>> SYSTEM READY</p>
-            </div>
+        <div class="sub-box">
+            <label>Bio-Metrics</label>
+            <select id="input-gender" class="btn-ghost">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Non-Binary">Non-Binary</option>
+            </select>
+            <select id="input-race" class="btn-ghost">
+                <option value="Northan">Northan</option>
+                <option value="Vanguard">Vanguard</option>
+                <option value="Islander">Islander</option>
+                <option value="Highlander">Highlander</option>
+            </select>
+            <select id="setup-country" class="btn-ghost">
+                <option value="USA">USA</option>
+                <option value="UK">UK</option>
+                <option value="Japan">Japan</option>
+                <option value="Brazil">Brazil</option>
+            </select>
+        </div>
+        
+        <button class="btn-main" onclick="finalizeLife()">BEGIN LIFE</button>
+    </div>
 
-            <div class="header">
-                <button class="btn-ghost" onclick="exitToHome()" style="border:none; font-size:1.2rem; padding:0; cursor:pointer;">🏠</button>
-                <h1><span id="char-name">Soul</span></h1>
-                <div class="money-display">Bank: <span id="val-money">0</span></div>
-            </div>
+    <div id="main-ui" style="display:none;">
+        <div class="header">
+            <button class="btn-ghost" onclick="exitToHome()">🏠</button>
+            <h1 id="char-name">Loading...</h1>
+            <div class="money-display">$<span id="val-money">0</span></div>
+        </div>
 
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <label>Health</label>
-                    <div class="bar-bg"><div id="bar-health" class="bar-fill" style="background:#4ade80; width:100%;"></div></div>
-                </div>
-                <div class="stat-box">
-                    <label>Mental</label>
-                    <div class="bar-bg"><div id="bar-mental" class="bar-fill" style="background:#38bdf8; width:100%;"></div></div>
-                </div>
-                <div class="stat-box">
-                    <label>Fame</label>
-                    <div class="bar-bg"><div id="bar-fame" class="bar-fill" style="background:#f472b6; width:0%;"></div></div>
-                </div>
-            </div>
+        <div class="info-row">
+            Age: <span id="val-age">0</span> | <span id="char-standing">Infant</span>
+        </div>
 
-            <div class="tab-nav">
-                <button onclick="showTab('main')">Life</button>
-                <button onclick="showTab('assets')">Assets</button>
-                <button onclick="showTab('world')">World</button>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <label>Health</label>
+                <div class="bar-bg"><div id="bar-health" class="bar-fill" style="background:var(--success); width:100%;"></div></div>
             </div>
-
-            <div id="tab-main" class="tab-content">
-                <div class="info-row">Age: <span id="val-age">18</span> | IQ: <span id="val-iq">100</span></div>
-                <div class="info-row">Standing: <span id="val-standing">Commoner</span></div>
-                
-                <button class="btn-main" onclick="ageUp()">AGE UP (+1 Year)</button>
-                
-                <div id="retired-parent-info" style="display:none;" class="sub-box">
-                    <p>Parent: <span id="parent-name"></span> (Bond: <span id="val-rel">0</span>%)</p>
-                    <button class="btn-ghost" onclick="visitParent()">🎁 Visit Parent ($1k)</button>
-                    <button class="btn-ghost" onclick="passTheTorch()">👑 Pass the Torch</button>
-                </div>
+            <div class="stat-box">
+                <label>Mental</label>
+                <div class="bar-bg"><div id="bar-mental" class="bar-fill" style="background:var(--accent); width:100%;"></div></div>
             </div>
-
-            <div id="tab-assets" class="tab-content" style="display:none;">
-                <div class="sub-box">
-                    <p>Private Items: <span id="private-count">0</span> | Family Vault: <span id="family-count">0</span></p>
-                    <button class="btn-ghost" id="btn-challenge" onclick="challengeDynasty()" style="display:none;">⚖️ Sue Dynasty</button>
-                </div>
-                <div class="sub-box">
-                    <p>Stocks: <span id="val-stocks">$0</span></p>
-                    <button class="btn-ghost" onclick="invest(5000)">Invest $5k</button>
-                    <button class="btn-ghost" onclick="sellStocks()">Sell All</button>
-                </div>
+            <div class="stat-box">
+                <label>Smart</label>
+                <div class="bar-bg"><div id="bar-smart" class="bar-fill" style="background:#a855f7; width:50%;"></div></div>
             </div>
-
-            <div id="tab-world" class="tab-content" style="display:none;">
-                <div class="sub-box">
-                    <p id="stability-text">Stability: Secure</p>
-                    <div class="bar-bg" style="height:4px;"><div id="bar-stability" class="bar-fill" style="background:#fbbf24; width:100%;"></div></div>
-                </div>
-                <button class="btn-ghost" onclick="spreadPropaganda('Cult')">👁️ Start Cult</button>
-                <button class="btn-ghost" onclick="goDark()">🕶️ Bribe Police ($10k)</button>
+            <div class="stat-box">
+                <label>Looks</label>
+                <div class="bar-bg"><div id="bar-looks" class="bar-fill" style="background:#ec4899; width:50%;"></div></div>
             </div>
+        </div>
 
-            <div id="log">Welcome to the Dynasty. Your legacy starts now.</div>
-        </div> </div> <script src="script.js"></script>
+        <div id="fame-container" style="display:none;" class="stat-box">
+            <label>Fame</label>
+            <div class="bar-bg"><div id="bar-fame" class="bar-fill" style="background:var(--fame); width:0%;"></div></div>
+        </div>
+
+        <div class="tab-nav">
+            <button onclick="showTab('main')">Life</button>
+            <button onclick="showTab('social')">Social</button>
+            <button onclick="showTab('active')">Action</button>
+            <button onclick="showTab('assets')">Assets</button>
+        </div>
+
+        <div id="tab-main" class="tab-content">
+            <div id="log">Welcome to the world...</div>
+            <button class="btn-main" style="margin-top:15px;" onclick="ageUp()">AGE UP (+1 Year)</button>
+        </div>
+
+        <div id="tab-social" class="tab-content" style="display:none;">
+            <div class="sub-box">
+                <h3>Family & Romance</h3>
+                <button class="btn-ghost" onclick="findDate()" style="width:100%; border-color:var(--fame); color:var(--fame); margin-bottom:10px;">💘 Look for a Date</button>
+                <div id="list-family"></div>
+            </div>
+            <div class="sub-box">
+                <h3>Pets & Animals</h3>
+                <div id="pet-shop" style="margin-bottom:10px;">
+                    <button class="btn-ghost" onclick="adoptPet(0)">🐕 Dog ($500)</button>
+                    <button class="btn-ghost" onclick="adoptPet(1)">🐈 Cat ($300)</button>
+                </div>
+                <div id="list-pets"></div>
+            </div>
+        </div>
+
+        <div id="tab-active" class="tab-content" style="display:none;">
+            <div id="school-section" class="sub-box">
+                <h3>Education</h3>
+                <button class="btn-ghost" onclick="study()">📚 Study Hard</button>
+            </div>
+            <div id="job-section" class="sub-box" style="display:none;">
+                <h3>Career</h3>
+                <div id="current-job-info">Unemployed</div>
+                <div id="job-board"></div>
+            </div>
+            <div class="sub-box">
+                <h3>Healthcare</h3>
+                <button class="btn-ghost" onclick="seekTherapy('cheap')">🤝 Support Group ($500)</button>
+                <button class="btn-ghost" onclick="seekTherapy('expensive')">🏥 Psychiatrist ($5,000)</button>
+            </div>
+        </div>
+
+        <div id="tab-assets" class="tab-content" style="display:none;">
+            <div class="sub-box">
+                <h3>Real Estate & Vehicles</h3>
+                <p style="font-size:0.7rem; color:#666;">Feature coming soon...</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="archive-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; justify-content:center; align-items:center;">
+    <div id="game-container" style="max-height: 90vh; overflow-y: auto; border: 2px solid var(--accent);">
+        <h2 style="color:var(--accent); text-align:center;">📜 WORLD ARCHIVES</h2>
+        
+        <div id="archive-list" class="sub-box"></div>
+
+        <div class="sub-box" style="border-top: 2px solid var(--danger); margin-top: 20px;">
+            <h3 style="color:var(--danger); text-align:center;">🪦 THE GRAVEYARD</h3>
+            <div id="graveyard-list"></div>
+        </div>
+
+        <button class="btn-main" onclick="closeArchive()">CLOSE</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
