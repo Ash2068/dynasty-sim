@@ -15,6 +15,61 @@ function initGame() {
     updateUI();
 }
 
+let tempLife = {}; // Temporary object to hold rolled stats
+
+function initGame() {
+    const saved = localStorage.getItem('dynasty_current');
+    if (saved) {
+        p = JSON.parse(saved);
+        showUI('main'); // Jump straight to the game
+    } else {
+        showUI('setup'); // Show the character creator
+        rollStats();     // Auto-roll the first one
+    }
+    updateUI();
+}
+
+function showUI(screen) {
+    document.getElementById('setup-screen').style.display = (screen === 'setup') ? 'block' : 'none';
+    document.getElementById('main-ui').style.display = (screen === 'main') ? 'block' : 'none';
+}
+
+function rollStats() {
+    tempLife = {
+        name: "Soul_" + Math.floor(Math.random() * 9999),
+        iq: 90 + Math.floor(Math.random() * 70),
+        looks: 50 + Math.floor(Math.random() * 50)
+    };
+    
+    document.getElementById('setup-name').innerText = tempLife.name;
+    document.getElementById('setup-iq').innerText = tempLife.iq;
+}
+
+function finalizeLife() {
+    const selectedCountry = document.getElementById('setup-country').value;
+    
+    // Convert tempLife to the actual player object
+    p = {
+        ...tempLife,
+        age: 18,
+        money: 1500, // Starting Cash
+        health: 100,
+        mentalHealth: 100,
+        fame: 0,
+        standing: "Commoner",
+        country: selectedCountry,
+        isBlackSheep: false,
+        privateVault: [],
+        newsTimer: 0,
+        alive: true
+    };
+
+    save();
+    showUI('main');
+    updateUI();
+    updateLog(`A new life begins in ${selectedCountry}.`);
+}
+
 function createNewLife(inheritance = 1000) {
     p = {
         name: "Soul_" + Math.floor(Math.random()*999),
