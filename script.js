@@ -241,6 +241,14 @@ function updateUI() {
     }
 }
 
+// --- 8. NAVIGATION & RESET ---
+function exitToHome() {
+    if (confirm("Are you sure? This will save your progress and return to the start screen.")) {
+        save(); // Ensure data is tucked away in LocalStorage
+        location.reload(); // Refresh the page to show the setup-screen
+    }
+}
+
 function save() { localStorage.setItem('dynasty_current', JSON.stringify(p)); }
 function showUI(type) {
     document.getElementById('setup-screen').style.display = type === 'setup' ? 'block' : 'none';
