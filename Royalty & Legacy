@@ -1,1 +1,15 @@
+const RoyaltyModule = {
+    titles: ["Peasant", "Knight", "Baron", "Duke", "Royal"],
+    
+    checkTitle() {
+        if (p.money > 1000000) return this.titles[4];
+        if (p.money > 500000) return this.titles[3];
+        if (p.fame > 80) return this.titles[1];
+        return this.titles[0];
+    },
 
+    getInheritanceTax() {
+        // Royals keep more money; Peasants lose more to "debt collectors"
+        return p.hasPrenup ? 0.05 : 0.40;
+    }
+};
