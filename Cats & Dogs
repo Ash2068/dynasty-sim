@@ -1,1 +1,7 @@
-
+const PetModule = {
+    trainPet(index) {
+        const pet = p.relationships.pets[index];
+        pet.bonus += 5;
+        updateLog(`🐾 PETS: ${pet.species} is now better trained!`);
+    }
+};
