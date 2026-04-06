@@ -1,1 +1,22 @@
+const SeasonsModule = {
+    currentSeason: "Spring",
+    seasons: ["Spring", "Summer", "Autumn", "Winter"],
+    
+    updateSeason(age) {
+        // Rotates seasons every age up
+        this.currentSeason = this.seasons[age % 4];
+        this.applySeasonalEffects();
+    },
 
+    applySeasonalEffects() {
+        let msg = `The season is now ${this.currentSeason}.`;
+        if (this.currentSeason === "Winter") {
+            p.health -= 2; // Cold weather risk
+            msg += " It's freezing! Health slightly dropped.";
+        } else if (this.currentSeason === "Summer") {
+            p.mental += 5; // Sun boost
+            msg += " The sun is out! Mental health improved.";
+        }
+        updateLog(`🌦️ SEASONS: ${msg}`);
+    }
+};
