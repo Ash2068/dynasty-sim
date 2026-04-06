@@ -1,1 +1,12 @@
+const UniModule = {
+    isEnrolled: false,
+    tuitionDebt: 0,
 
+    enroll() {
+        if (p.age === 18 && p.smart > 60) {
+            this.isEnrolled = true;
+            this.tuitionDebt = 40000;
+            updateLog("🎓 UNI: Enrolled in University. Student Debt: $40,000.");
+        }
+    }
+};
