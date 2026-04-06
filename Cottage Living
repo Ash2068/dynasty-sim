@@ -1,1 +1,10 @@
+const CottageModule = {
+    hasCow: false,
 
+    collectMilk() {
+        if (this.hasCow) {
+            p.money += 50;
+            updateLog("🐄 COTTAGE: Sold fresh milk for $50.");
+        }
+    }
+};
