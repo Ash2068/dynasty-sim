@@ -1,1 +1,10 @@
+const CityModule = {
+    rent: 1200,
 
+    payRent() {
+        if (p.age >= 18 && !p.isMarried) {
+            p.money -= this.rent;
+            updateLog(`🏙️ CITY: Paid $${this.rent} for your studio apartment.`);
+        }
+    }
+};
