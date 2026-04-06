@@ -1,1 +1,13 @@
+const IslandLivingModule = {
+    isIsland(country) {
+        const islands = ["Japan", "UK", "Philippines", "Iceland"];
+        return islands.includes(country);
+    },
 
+    triggerIslandEvent() {
+        if (Math.random() < 0.1) {
+            updateLog("🏝️ ISLAND: You spent the day spear-fishing. (+5 Health)");
+            p.health = Math.min(100, p.health + 5);
+        }
+    }
+};
