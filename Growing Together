@@ -1,1 +1,15 @@
+const FamilyModule = {
+    milestones: [
+        { age: 1, text: "Took first steps." },
+        { age: 16, text: "Learned to drive." },
+        { age: 50, text: "Mid-life crisis." }
+    ],
 
+    checkMilestones() {
+        const m = this.milestones.find(m => m.age === p.age);
+        if (m) {
+            updateLog(`👨‍👩‍👧‍👦 TOGETHER: Milestone Reached - ${m.text}`);
+            p.mental += 10;
+        }
+    }
+};
