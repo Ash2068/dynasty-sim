@@ -13,18 +13,26 @@ const jobList = [
 // --- 2. INITIALIZATION ---
 window.onload = () => {
     const saved = localStorage.getItem('dynasty_current');
-    if (saved) {
-        p = JSON.parse(saved);
-        showUI('main');
-        updateUI();
-    } else {
-        showUI('setup');
-        rollStats();
+    
+    // Improved Check: Only load if data exists AND isn't an empty string/null
+    if (saved && saved !== "null" && saved !== "" && saved !== "undefined") {
+        try {
+            p = JSON.parse(saved);
+            // One last safety check: Does the object actually have a name?
+            if (p && p.name) {
+                showUI('main');
+                updateUI();
+                return; // Stop here, we are in the game
+            }
+        } catch (e) {
+            console.error("Corrupt save data found, clearing...", e);
+            localStorage.removeItem('dynasty_current');
+        }
     }
-    const arcBtn = document.getElementById('btn-archive');
-    if (arcBtn && (archive.length > 0 || graveyard.length > 0)) {
-        arcBtn.style.display = 'inline-block';
-    }
+    
+    // If we reach here, no valid game was found. Show setup.
+    showUI('setup');
+    rollStats();
 };
 
 // --- 3. THE BIRTH ENGINE ---
@@ -268,23 +276,19 @@ function closeArchive() { document.getElementById('archive-modal').style.display
 
 // --- 9. GLOBAL HOME BUTTON LOGIC ---
 window.exitToHome = function() {
-    console.log("Home button triggered. Initiating Hard Reset...");
-    
-    if (confirm("Return to main menu? Your current progress will be archived.")) {
-        // 1. Save the current state to the graveyard/archive logic if needed
+    if (confirm("Save and return to the main menu?")) {
+        // 1. Perform a final save
         save(); 
 
-        // 2. THE NUCLEAR OPTION: Clear the specific session key
+        // 2. Triple-Clear the session
         localStorage.removeItem('dynasty_current');
+        localStorage.setItem('dynasty_current', 'null'); 
         
-        // 3. Double Check: If the key still exists, force it to null
-        localStorage.setItem('dynasty_current', "");
+        console.log("Session cleared. Redirecting to clean state...");
 
-        console.log("Session cleared. Reloading in 100ms...");
-
-        // 4. Tiny delay to ensure LocalStorage writes to disk before the reload happens
-        setTimeout(() => {
-            window.location.href = window.location.pathname + "?reset=" + Date.now();
-        }, 100);
+        // 3. Force the browser to a clean URL without any cached data
+        // This adds a unique timestamp so the browser can't "remember" the old page state
+        const cleanPath = window.location.origin + window.location.pathname;
+        window.location.replace(cleanPath + "?refresh=" + Date.now());
     }
 };
