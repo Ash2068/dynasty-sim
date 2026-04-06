@@ -28,16 +28,22 @@
                 <option value="Non-Binary">Non-Binary</option>
             </select>
             <select id="input-race" class="btn-ghost">
-                <option value="Northan">Northan</option>
-                <option value="Vanguard">Vanguard</option>
-                <option value="Islander">Islander</option>
-                <option value="Highlander">Highlander</option>
+                <option value="White">White</option>
+                <option value="Black or African American">Black or African American</option>
+                <option value="Asian">Asian</option>
+                <option value="Hispanic or Latino">Hispanic or Latino</option>
+                <option value="Native American">Native American</option>
+                <option value="Pacific Islander">Pacific Islander</option>
+                <option value="Mixed/Other">Mixed/Other</option>
             </select>
             <select id="setup-country" class="btn-ghost">
                 <option value="USA">USA</option>
                 <option value="UK">UK</option>
                 <option value="Japan">Japan</option>
                 <option value="Brazil">Brazil</option>
+                <option value="Nigeria">Nigeria</option>
+                <option value="Mexico">Mexico</option>
+                <option value="Canada">Canada</option>
             </select>
         </div>
         
@@ -56,22 +62,10 @@
         </div>
 
         <div class="stats-grid">
-            <div class="stat-box">
-                <label>Health</label>
-                <div class="bar-bg"><div id="bar-health" class="bar-fill" style="background:var(--success); width:100%;"></div></div>
-            </div>
-            <div class="stat-box">
-                <label>Mental</label>
-                <div class="bar-bg"><div id="bar-mental" class="bar-fill" style="background:var(--accent); width:100%;"></div></div>
-            </div>
-            <div class="stat-box">
-                <label>Smart</label>
-                <div class="bar-bg"><div id="bar-smart" class="bar-fill" style="background:#a855f7; width:50%;"></div></div>
-            </div>
-            <div class="stat-box">
-                <label>Looks</label>
-                <div class="bar-bg"><div id="bar-looks" class="bar-fill" style="background:#ec4899; width:50%;"></div></div>
-            </div>
+            <div class="stat-box"><label>Health</label><div class="bar-bg"><div id="bar-health" class="bar-fill" style="background:var(--success); width:100%;"></div></div></div>
+            <div class="stat-box"><label>Mental</label><div class="bar-bg"><div id="bar-mental" class="bar-fill" style="background:var(--accent); width:100%;"></div></div></div>
+            <div class="stat-box"><label>Smart</label><div class="bar-bg"><div id="bar-smart" class="bar-fill" style="background:#a855f7; width:50%;"></div></div></div>
+            <div class="stat-box"><label>Looks</label><div class="bar-bg"><div id="bar-looks" class="bar-fill" style="background:#ec4899; width:50%;"></div></div></div>
         </div>
 
         <div id="fame-container" style="display:none;" class="stat-box">
@@ -108,6 +102,15 @@
         </div>
 
         <div id="tab-active" class="tab-content" style="display:none;">
+            <div id="social-media-section" class="sub-box" style="display:none; border-color:var(--fame);">
+                <h3 style="color:var(--fame);">📱 SMARTPHONE</h3>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
+                    <button class="btn-ghost" onclick="postSocial('funny')">🤡 Meme</button>
+                    <button class="btn-ghost" onclick="postSocial('aesthetic')">📸 Selfie</button>
+                    <button class="btn-ghost" onclick="postSocial('rant')">🗯️ Rant</button>
+                    <button class="btn-ghost" onclick="postSocial('scroll')">🌊 Scroll</button>
+                </div>
+            </div>
             <div id="school-section" class="sub-box">
                 <h3>Education</h3>
                 <button class="btn-ghost" onclick="study()">📚 Study Hard</button>
@@ -125,30 +128,44 @@
         </div>
 
         <div id="tab-assets" class="tab-content" style="display:none;">
-            <div class="sub-box">
-                <h3>Real Estate & Vehicles</h3>
-                <p style="font-size:0.7rem; color:#666;">Feature coming soon...</p>
-            </div>
+            <div class="sub-box"><h3>Real Estate & Vehicles</h3><p style="font-size:0.7rem; color:#666;">Coming soon...</p></div>
         </div>
+    </div>
+</div>
 
+<div id="choice-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; justify-content:center; align-items:center; padding: 20px;">
+    <div class="sub-box" style="background:#1a1a1a; max-width:400px; width:100%; text-align:center; border:2px solid var(--accent); padding: 20px;">
+        <h2 id="event-title" style="color:var(--accent); margin-bottom:10px;">Event</h2>
+        <p id="event-msg" style="margin-bottom:20px; font-size:0.95rem; line-height: 1.4;">Message</p>
+        <div id="event-choices" style="display:flex; flex-direction:column; gap:12px;"></div>
     </div>
 </div>
 
 <div id="archive-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; justify-content:center; align-items:center;">
     <div id="game-container" style="max-height: 90vh; overflow-y: auto; border: 2px solid var(--accent);">
         <h2 style="color:var(--accent); text-align:center;">📜 WORLD ARCHIVES</h2>
-        
         <div id="archive-list" class="sub-box"></div>
-
         <div class="sub-box" style="border-top: 2px solid var(--danger); margin-top: 20px;">
             <h3 style="color:var(--danger); text-align:center;">🪦 THE GRAVEYARD</h3>
             <div id="graveyard-list"></div>
         </div>
-
         <button class="btn-main" onclick="closeArchive()">CLOSE</button>
     </div>
 </div>
 
+<script src="seasons.js"></script>
+<script src="royalty.js"></script>
+<script src="get-together.js"></script>
+<script src="get-to-work.js"></script>
+<script src="get-famous.js"></script>
+<script src="eco-lifestyle.js"></script>
+<script src="discover-university.js"></script>
+<script src="cottage-living.js"></script>
+<script src="city-living.js"></script>
+<script src="cats-and-dogs.js"></script>
+<script src="island-living.js"></script>
+<script src="growing-together.js"></script>
 <script src="script.js"></script>
+
 </body>
 </html>
