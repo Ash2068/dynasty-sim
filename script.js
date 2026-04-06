@@ -1,5 +1,5 @@
 // --- 1. GLOBAL STATE ---
-let p = {}; // The Player Object
+let p = {}; 
 let archive = JSON.parse(localStorage.getItem('dynasty_archive')) || [];
 let graveyard = JSON.parse(localStorage.getItem('dynasty_graveyard')) || [];
 
@@ -8,11 +8,6 @@ const jobList = [
     { title: "Junior IT Support", salary: 45000, reqSmart: 60 },
     { title: "Data Analyst", salary: 65000, reqSmart: 85 },
     { title: "Research Scientist", salary: 95000, reqSmart: 95 }
-];
-
-const petTypes = [
-    { species: "Dog", price: 500, monthly: 50, life: 15, bonus: 10 },
-    { species: "Cat", price: 300, monthly: 30, life: 18, bonus: 8 }
 ];
 
 // --- 2. INITIALIZATION ---
@@ -35,7 +30,6 @@ window.onload = () => {
 function rollStats() {
     const firstNames = ["Ashlyn", "Jordan", "Taylor", "Morgan", "Casey", "Quinn", "Alex"];
     const lastNames = ["Hall", "Rivers", "Chen", "Gentry", "Smith", "Vance", "Nova"];
-    
     const genders = ["Male", "Female", "Non-Binary"];
     const ethnicGroups = ["White", "Black or African American", "Asian", "Hispanic or Latino", "Native American", "Pacific Islander", "Mixed/Other"];
     const countries = ["USA", "UK", "Japan", "Brazil", "Nigeria", "Mexico", "Canada"];
@@ -92,7 +86,7 @@ function ageUp() {
     if (p.health <= 0) { die(); return; }
     p.age++;
 
-    // --- EXPANSION PACK HOOKS (Triggering your new files) ---
+    // --- EXPANSION PACK HOOKS ---
     if (typeof SeasonsModule !== 'undefined') SeasonsModule.updateSeason(p.age);
     if (typeof FamilyModule !== 'undefined') FamilyModule.checkMilestones();
     if (typeof TogetherModule !== 'undefined') TogetherModule.processClubBonus();
@@ -105,7 +99,6 @@ function ageUp() {
         IslandLivingModule.triggerIslandEvent();
     }
 
-    // --- CORE LOGIC ---
     if (p.isBreakdown) {
         handleBreakdownTurn();
     } else {
@@ -122,116 +115,44 @@ function processStandardYear() {
         p.money += p.job.salary;
         if (Math.random() < 0.1) {
             p.job.salary += Math.floor(p.job.salary * 0.05);
-            updateLog("You received a 5% performance raise!");
+            updateLog("PERFORMANCE: You received a 5% raise!");
         }
     }
 
-    if (p.age === 5) updateLog("You started Primary School.");
+    if (p.age === 5) updateLog("SCHOOL: You started Primary School.");
     if (p.age === 18) {
-        updateLog("You graduated! Careers are now available.");
-        document.getElementById('job-section').style.display = 'block';
-        document.getElementById('fame-container').style.display = 'block';
+        updateLog("GRADUATION: Careers and Fame are now available.");
         refreshJobBoard();
     }
 
-    p.relationships.pets.forEach(pet => p.money -= pet.monthly);
-    if (p.age > 10 && Math.random() < 0.15 && typeof triggerRandomEvent !== 'undefined') {
+    // Trigger Random Events (if Choice System is loaded)
+    if (p.age > 3 && Math.random() < 0.20 && typeof triggerRandomEvent !== 'undefined') {
         triggerRandomEvent();
     }
 }
 
-function handleBreakdownTurn() {
-    p.breakdownTimer--;
-    const weird = ["You stared at a wall all day.", "You spent $200 on magic beans.", "You forgot your own name."];
-    updateLog(`[DISORDER] ${weird[Math.floor(Math.random() * weird.length)]}`);
-    if (p.breakdownTimer <= 0) {
-        p.isBreakdown = false;
-        p.mental = 20;
-        updateLog("RECOVERY: You have regained control.");
-    }
-}
-
-// --- 5. SOCIAL & CAREER ACTIONS ---
-function study() {
-    p.smart = Math.min(100, p.smart + 3);
-    p.mental = Math.max(0, p.mental - 8);
-    updateLog("You studied hard. (+Smart, -Mental)");
-    updateUI();
-}
-
-function seekTherapy(tier) {
-    const cost = tier === 'cheap' ? 500 : 5000;
-    if (p.money < cost) { updateLog("Insufficient funds."); return; }
-    p.money -= cost;
-    p.mental = Math.min(100, p.mental + (tier === 'cheap' ? 15 : 50));
-    updateLog(`Therapy successful. (+Mental)`);
-    updateUI();
-}
-
-function refreshJobBoard() {
-    const board = document.getElementById('job-board');
-    board.innerHTML = "";
-    jobList.forEach((job, i) => {
-        const canApply = p.smart >= job.reqSmart;
-        board.innerHTML += `<button class="btn-ghost" ${canApply ? '' : 'disabled'} onclick="applyJob(${i})">
-            ${job.title} ($${job.salary})</button>`;
-    });
-}
-
-function applyJob(i) {
-    p.job = jobList[i];
-    updateLog(`HIRED: You are now a ${p.job.title}.`);
-    updateUI();
-}
-
-// --- 6. ARCHIVE & DEATH ---
-function die() {
-    // Royalty Check for Inheritance Tax
-    let tax = 0.2; // Default 20%
-    if (typeof RoyaltyModule !== 'undefined') tax = RoyaltyModule.getInheritanceTax();
-    
-    const legacyMoney = Math.floor(p.money * (1 - tax));
-    const title = (typeof RoyaltyModule !== 'undefined') ? RoyaltyModule.checkTitle() : "Citizen";
-
-    const record = { 
-        name: p.name, 
-        age: p.age, 
-        summary: `${title} - ${p.job ? p.job.title : "Unemployed"}` 
-    };
-    
-    graveyard.push(record);
-    localStorage.setItem('dynasty_graveyard', JSON.stringify(graveyard));
-    localStorage.setItem('pending_inheritance', legacyMoney);
-    
-    alert(`Rest in Peace, ${p.name}. Age: ${p.age}`);
-    localStorage.removeItem('dynasty_current');
-    location.reload();
-}
-
-// --- 7. UI UTILS ---
-function showTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
-    document.getElementById(`tab-${tabId}`).style.display = 'block';
-}
-
-function updateLog(msg) {
-    const log = document.getElementById('log');
-    if(log) {
-        log.innerHTML += `<div>> ${msg}</div>`;
-        log.scrollTop = log.scrollHeight;
-    }
-}
-
+// --- 5. UI & UTILS ---
 function updateUI() {
     document.getElementById('char-name').innerText = p.name;
     document.getElementById('val-money').innerText = p.money.toLocaleString();
     document.getElementById('val-age').innerText = p.age;
+    
+    // Dynamic Life Standing label
+    let standing = "Infant";
+    if (p.age >= 3) standing = "Toddler";
+    if (p.age >= 6) standing = "Child";
+    if (p.age >= 13) standing = "Teenager";
+    if (p.age >= 18) standing = "Adult";
+    if (p.age >= 65) standing = "Senior";
+    document.getElementById('char-standing').innerText = standing;
+
     document.getElementById('bar-health').style.width = p.health + "%";
     document.getElementById('bar-mental').style.width = p.mental + "%";
     document.getElementById('bar-smart').style.width = p.smart + "%";
     document.getElementById('bar-looks').style.width = p.looks + "%";
 
-    // Social Media / Fame Age Gate
+    // Age Gates
+    document.getElementById('job-section').style.display = p.age >= 18 ? 'block' : 'none';
     if (p.age >= 13) {
         if(document.getElementById('social-media-section')) document.getElementById('social-media-section').style.display = 'block';
         if(document.getElementById('fame-container')) {
@@ -241,12 +162,20 @@ function updateUI() {
     }
 }
 
-// --- 8. NAVIGATION & RESET ---
-function exitToHome() {
-    if (confirm("Are you sure? This will save your progress and return to the start screen.")) {
-        save(); // Ensure data is tucked away in LocalStorage
-        location.reload(); // Refresh the page to show the setup-screen
-    }
+function die() {
+    let tax = 0.2; 
+    if (typeof RoyaltyModule !== 'undefined') tax = RoyaltyModule.getInheritanceTax();
+    
+    const legacyMoney = Math.floor(p.money * (1 - tax));
+    const title = (typeof RoyaltyModule !== 'undefined') ? RoyaltyModule.checkTitle() : "Citizen";
+
+    graveyard.push({ name: p.name, age: p.age, summary: `${title} - ${p.job ? p.job.title : "Unemployed"}` });
+    localStorage.setItem('dynasty_graveyard', JSON.stringify(graveyard));
+    localStorage.setItem('pending_inheritance', legacyMoney);
+    
+    alert(`Rest in Peace, ${p.name}. You lived to be ${p.age}. Inheritance for next life: $${legacyMoney.toLocaleString()}`);
+    localStorage.removeItem('dynasty_current');
+    location.reload();
 }
 
 function save() { localStorage.setItem('dynasty_current', JSON.stringify(p)); }
@@ -254,6 +183,11 @@ function showUI(type) {
     document.getElementById('setup-screen').style.display = type === 'setup' ? 'block' : 'none';
     document.getElementById('main-ui').style.display = type === 'main' ? 'block' : 'none';
 }
-function openArchive() { document.getElementById('archive-modal').style.display = 'flex'; }
-function closeArchive() { document.getElementById('archive-modal').style.display = 'none'; }
-function checkMentalHealth() { if (p.mental <= 0) { p.isBreakdown = true; p.breakdownTimer = 10; p.job = null; } }
+function updateLog(msg) {
+    const log = document.getElementById('log');
+    if(log) {
+        log.innerHTML += `<div>> ${msg}</div>`;
+        log.scrollTop = log.scrollHeight;
+    }
+}
+function checkMentalHealth() { if (p.mental <= 0) { p.isBreakdown = true; p.breakdownTimer = 5; p.job = null; } }
