@@ -1,1 +1,9 @@
+const EcoModule = {
+    footprint: 50, // 0 is Green, 100 is Industrial
 
+    applyEcoEffects() {
+        if (this.footprint < 30) p.health += 5;
+        if (this.footprint > 70) p.health -= 5;
+        updateLog(`🌱 ECO: Current Footprint is ${this.footprint > 50 ? 'Industrial' : 'Green'}.`);
+    }
+};
