@@ -21,8 +21,9 @@ window.onload = () => {
         showUI('setup');
         rollStats();
     }
-    if (archive.length > 0 || graveyard.length > 0) {
-        document.getElementById('btn-archive').style.display = 'inline-block';
+    const arcBtn = document.getElementById('btn-archive');
+    if (arcBtn && (archive.length > 0 || graveyard.length > 0)) {
+        arcBtn.style.display = 'inline-block';
     }
 };
 
@@ -125,43 +126,57 @@ function processStandardYear() {
         refreshJobBoard();
     }
 
-    // Trigger Random Events (if Choice System is loaded)
     if (p.age > 3 && Math.random() < 0.20 && typeof triggerRandomEvent !== 'undefined') {
         triggerRandomEvent();
     }
 }
 
-// --- 5. UI & UTILS ---
-function updateUI() {
-    document.getElementById('char-name').innerText = p.name;
-    document.getElementById('val-money').innerText = p.money.toLocaleString();
-    document.getElementById('val-age').innerText = p.age;
-    
-    // Dynamic Life Standing label
-    let standing = "Infant";
-    if (p.age >= 3) standing = "Toddler";
-    if (p.age >= 6) standing = "Child";
-    if (p.age >= 13) standing = "Teenager";
-    if (p.age >= 18) standing = "Adult";
-    if (p.age >= 65) standing = "Senior";
-    document.getElementById('char-standing').innerText = standing;
-
-    document.getElementById('bar-health').style.width = p.health + "%";
-    document.getElementById('bar-mental').style.width = p.mental + "%";
-    document.getElementById('bar-smart').style.width = p.smart + "%";
-    document.getElementById('bar-looks').style.width = p.looks + "%";
-
-    // Age Gates
-    document.getElementById('job-section').style.display = p.age >= 18 ? 'block' : 'none';
-    if (p.age >= 13) {
-        if(document.getElementById('social-media-section')) document.getElementById('social-media-section').style.display = 'block';
-        if(document.getElementById('fame-container')) {
-            document.getElementById('fame-container').style.display = 'block';
-            document.getElementById('bar-fame').style.width = p.fame + "%";
-        }
+function handleBreakdownTurn() {
+    p.breakdownTimer--;
+    const weird = ["You stared at a wall all day.", "You spent $200 on magic beans.", "You forgot your own name."];
+    updateLog(`[DISORDER] ${weird[Math.floor(Math.random() * weird.length)]}`);
+    if (p.breakdownTimer <= 0) {
+        p.isBreakdown = false;
+        p.mental = 20;
+        updateLog("RECOVERY: You have regained control.");
     }
 }
 
+// --- 5. SOCIAL & CAREER ACTIONS ---
+function study() {
+    p.smart = Math.min(100, p.smart + 3);
+    p.mental = Math.max(0, p.mental - 8);
+    updateLog("You studied hard. (+Smart, -Mental)");
+    updateUI();
+}
+
+function seekTherapy(tier) {
+    const cost = tier === 'cheap' ? 500 : 5000;
+    if (p.money < cost) { updateLog("Insufficient funds."); return; }
+    p.money -= cost;
+    p.mental = Math.min(100, p.mental + (tier === 'cheap' ? 15 : 50));
+    updateLog(`Therapy successful. (+Mental)`);
+    updateUI();
+}
+
+function refreshJobBoard() {
+    const board = document.getElementById('job-board');
+    if (!board) return;
+    board.innerHTML = "";
+    jobList.forEach((job, i) => {
+        const canApply = p.smart >= job.reqSmart;
+        board.innerHTML += `<button class="btn-ghost" ${canApply ? '' : 'disabled'} onclick="applyJob(${i})">
+            ${job.title} ($${job.salary})</button>`;
+    });
+}
+
+function applyJob(i) {
+    p.job = jobList[i];
+    updateLog(`HIRED: You are now a ${p.job.title}.`);
+    updateUI();
+}
+
+// --- 6. ARCHIVE & DEATH ---
 function die() {
     let tax = 0.2; 
     if (typeof RoyaltyModule !== 'undefined') tax = RoyaltyModule.getInheritanceTax();
@@ -178,11 +193,13 @@ function die() {
     location.reload();
 }
 
-function save() { localStorage.setItem('dynasty_current', JSON.stringify(p)); }
-function showUI(type) {
-    document.getElementById('setup-screen').style.display = type === 'setup' ? 'block' : 'none';
-    document.getElementById('main-ui').style.display = type === 'main' ? 'block' : 'none';
+// --- 7. UI UTILS ---
+function showTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+    const target = document.getElementById(`tab-${tabId}`);
+    if (target) target.style.display = 'block';
 }
+
 function updateLog(msg) {
     const log = document.getElementById('log');
     if(log) {
@@ -190,4 +207,70 @@ function updateLog(msg) {
         log.scrollTop = log.scrollHeight;
     }
 }
-function checkMentalHealth() { if (p.mental <= 0) { p.isBreakdown = true; p.breakdownTimer = 5; p.job = null; } }
+
+function updateUI() {
+    document.getElementById('char-name').innerText = p.name;
+    document.getElementById('val-money').innerText = p.money.toLocaleString();
+    document.getElementById('val-age').innerText = p.age;
+    
+    let standing = "Infant";
+    if (p.age >= 3) standing = "Toddler";
+    if (p.age >= 6) standing = "Child";
+    if (p.age >= 13) standing = "Teenager";
+    if (p.age >= 18) standing = "Adult";
+    if (p.age >= 65) standing = "Senior";
+    document.getElementById('char-standing').innerText = standing;
+
+    document.getElementById('bar-health').style.width = p.health + "%";
+    document.getElementById('bar-mental').style.width = p.mental + "%";
+    document.getElementById('bar-smart').style.width = p.smart + "%";
+    document.getElementById('bar-looks').style.width = p.looks + "%";
+
+    const jobSect = document.getElementById('job-section');
+    if (jobSect) jobSect.style.display = p.age >= 18 ? 'block' : 'none';
+
+    if (p.age >= 13) {
+        const smSect = document.getElementById('social-media-section');
+        const fameCont = document.getElementById('fame-container');
+        if(smSect) smSect.style.display = 'block';
+        if(fameCont) {
+            fameCont.style.display = 'block';
+            document.getElementById('bar-fame').style.width = p.fame + "%";
+        }
+    }
+}
+
+// --- 8. NAVIGATION, SAVE & RESET ---
+function save() { 
+    localStorage.setItem('dynasty_current', JSON.stringify(p)); 
+}
+
+function showUI(type) {
+    const setup = document.getElementById('setup-screen');
+    const main = document.getElementById('main-ui');
+    if(setup && main) {
+        setup.style.display = type === 'setup' ? 'block' : 'none';
+        main.style.display = type === 'main' ? 'block' : 'none';
+    }
+}
+
+function openArchive() { document.getElementById('archive-modal').style.display = 'flex'; }
+function closeArchive() { document.getElementById('archive-modal').style.display = 'none'; }
+
+function checkMentalHealth() { 
+    if (p.mental <= 0) { 
+        p.isBreakdown = true; 
+        p.breakdownTimer = 5; 
+        p.job = null; 
+        updateLog("CRITICAL: You have suffered a mental breakdown.");
+    } 
+}
+
+// GLOBAL HOME BUTTON LINK
+window.exitToHome = function() {
+    console.log("Home button triggered.");
+    if (confirm("Are you sure? This will save your progress and return to the start screen.")) {
+        save(); 
+        window.location.replace(window.location.pathname);
+    }
+};
