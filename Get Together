@@ -1,1 +1,16 @@
+const TogetherModule = {
+    clubs: ["Coders", "Athletes", "Partiers"],
+    activeClub: null,
 
+    joinClub(clubName) {
+        this.activeClub = clubName;
+        updateLog(`👥 TOGETHER: Joined the ${clubName} club!`);
+    },
+
+    processClubBonus() {
+        if (!this.activeClub) return;
+        if (this.activeClub === "Coders") p.smart += 2;
+        if (this.activeClub === "Athletes") p.health += 2;
+        updateLog(`👥 TOGETHER: ${this.activeClub} club activities completed.`);
+    }
+};
