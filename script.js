@@ -268,15 +268,23 @@ function closeArchive() { document.getElementById('archive-modal').style.display
 
 // --- 9. GLOBAL HOME BUTTON LOGIC ---
 window.exitToHome = function() {
-    console.log("Home button triggered.");
-    if (confirm("Are you sure? This will save your progress and return to the start screen.")) {
-        // Save first so progress isn't lost for future games/graveyard
+    console.log("Home button triggered. Initiating Hard Reset...");
+    
+    if (confirm("Return to main menu? Your current progress will be archived.")) {
+        // 1. Save the current state to the graveyard/archive logic if needed
         save(); 
+
+        // 2. THE NUCLEAR OPTION: Clear the specific session key
+        localStorage.removeItem('dynasty_current');
         
-        // CRITICAL FIX: Clear the current session key so the game doesn't auto-resume
-        localStorage.removeItem('dynasty_current'); 
-        
-        // Clean refresh back to index
-        window.location.replace(window.location.pathname);
+        // 3. Double Check: If the key still exists, force it to null
+        localStorage.setItem('dynasty_current', "");
+
+        console.log("Session cleared. Reloading in 100ms...");
+
+        // 4. Tiny delay to ensure LocalStorage writes to disk before the reload happens
+        setTimeout(() => {
+            window.location.href = window.location.pathname + "?reset=" + Date.now();
+        }, 100);
     }
 };
