@@ -193,7 +193,7 @@ function die() {
     location.reload();
 }
 
-// --- 7. UI UTILS ---
+// --- 7. UI & NAVIGATION UTILS ---
 function showTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
     const target = document.getElementById(`tab-${tabId}`);
@@ -240,11 +240,6 @@ function updateUI() {
     }
 }
 
-// --- 8. NAVIGATION, SAVE & RESET ---
-function save() { 
-    localStorage.setItem('dynasty_current', JSON.stringify(p)); 
-}
-
 function showUI(type) {
     const setup = document.getElementById('setup-screen');
     const main = document.getElementById('main-ui');
@@ -254,8 +249,10 @@ function showUI(type) {
     }
 }
 
-function openArchive() { document.getElementById('archive-modal').style.display = 'flex'; }
-function closeArchive() { document.getElementById('archive-modal').style.display = 'none'; }
+// --- 8. SYSTEM ACTIONS ---
+function save() { 
+    localStorage.setItem('dynasty_current', JSON.stringify(p)); 
+}
 
 function checkMentalHealth() { 
     if (p.mental <= 0) { 
@@ -266,11 +263,20 @@ function checkMentalHealth() {
     } 
 }
 
-// GLOBAL HOME BUTTON LINK
+function openArchive() { document.getElementById('archive-modal').style.display = 'flex'; }
+function closeArchive() { document.getElementById('archive-modal').style.display = 'none'; }
+
+// --- 9. GLOBAL HOME BUTTON LOGIC ---
 window.exitToHome = function() {
     console.log("Home button triggered.");
     if (confirm("Are you sure? This will save your progress and return to the start screen.")) {
+        // Save first so progress isn't lost for future games/graveyard
         save(); 
+        
+        // CRITICAL FIX: Clear the current session key so the game doesn't auto-resume
+        localStorage.removeItem('dynasty_current'); 
+        
+        // Clean refresh back to index
         window.location.replace(window.location.pathname);
     }
 };
