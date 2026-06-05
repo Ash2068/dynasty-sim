@@ -1,10 +1,121 @@
-const CottageModule = {
-    hasCow: false,
+// ==========================================
+// COTTAGE & HOMESTEAD LIFESTYLE MODULE
+// ==========================================
 
-    collectMilk() {
-        if (this.hasCow) {
-            p.money += 50;
-            updateLog("🐄 COTTAGE: Sold fresh milk for $50.");
+export const HOMESTEAD_ANIMALS = {
+    chicken: { 
+        id: 'chicken', 
+        name: 'Chickens', 
+        buyCost: 150, 
+        yieldProduct: 'Fresh Eggs', 
+        yieldValue: 15, 
+        feedCostPerYear: 5 
+    },
+    cow: { 
+        id: 'cow', 
+        name: 'Dairy Cow', 
+        buyCost: 1200, 
+        yieldProduct: 'Fresh Milk', 
+        yieldValue: 50, // Matches your original milk payout
+        feedCostPerYear: 30 
+    },
+    bees: { 
+        id: 'bees', 
+        name: 'Honeybee Hive', 
+        buyCost: 400, 
+        yieldProduct: 'Organic Honey', 
+        yieldValue: 35, 
+        feedCostPerYear: 0 // Bees forage for free!
+    }
+};
+
+export const CottageModule = {
+    // Farm state tracking variables
+    hasPlot: false,
+    inventory: {
+        chicken: 0,
+        cow: 0, // Swapped from your simple boolean flag to an integer count
+        bees: 0
+    },
+
+    // Buy a cottage plot or farm expansion
+    buyCottagePlot(player, updateLog) {
+        const plotCost = 15000;
+        if (player.bankBalance < plotCost) return "You cannot afford to buy a cottage plot.";
+        
+        player.bankBalance -= plotCost;
+        this.hasPlot = true;
+        updateLog(`🏡 COTTAGE: You bought a cozy countryside cottage plot with a small barn! (-$${plotCost.toLocaleString()})`);
+        return true;
+    },
+
+    // Purchase livestock for your farm inventory
+    buyLivestock(player, animalKey, amount = 1, updateLog) {
+        if (!this.hasPlot) return "❌ You need a cottage plot before you can raise livestock!";
+        
+        const animal = HOMESTEAD_ANIMALS[animalKey.toLowerCase()];
+        if (!animal) return "Invalid animal selection.";
+
+        const totalCost = animal.buyCost * amount;
+        if (player.bankBalance < totalCost) return `You cannot afford to buy ${amount} ${animal.name}.`;
+
+        player.bankBalance -= totalCost;
+        this.inventory[animalKey.toLowerCase()] += amount;
+        
+        updateLog(`🚜 FARM: Bought ${amount}x ${animal.name} for your homestead. (-$${totalCost.toLocaleString()})`);
+        return true;
+    },
+
+    // Formatted and expanded around your original production snippet
+    collectMilk(player, updateLog) {
+        // Keeps backwards compatibility with your logic using the updated count tracker
+        if (this.inventory.cow > 0) {
+            const milkRevenue = this.inventory.cow * HOMESTEAD_ANIMALS.cow.yieldValue;
+            player.bankBalance += milkRevenue;
+            updateLog(`🐄 COTTAGE: Collected and sold fresh milk for $${milkRevenue}.`);
+        }
+    },
+
+    // Automatically processes all cottage production loops, expenses, and wilderness events
+    processYearlyHomestead(player, updateLog) {
+        if (!this.hasPlot) return;
+
+        let totalRevenue = 0;
+        let totalFeedBill = 0;
+
+        // 1. Process Production and Feed Costs for all livestock types
+        Object.keys(this.inventory).forEach(key => {
+            const count = this.inventory[key];
+            if (count > 0) {
+                const spec = HOMESTEAD_ANIMALS[key];
+                totalRevenue += count * spec.yieldValue;
+                totalFeedBill += count * spec.feedCostPerYear;
+            }
+        });
+
+        // Apply financial updates to player balance
+        if (totalRevenue > 0) {
+            player.bankBalance += totalRevenue;
+            player.bankBalance -= totalFeedBill;
+            player.stats.happiness = Math.min(100, player.stats.happiness + 4); // Rural peace bonus
+            updateLog(`🌾 COTTAGE: Harvested artisan farm goods. Sold products for +$${totalRevenue} (Feed bills: -$${totalFeedBill}).`);
+        }
+
+        // 2. Random Wilderness / Homestead Events Engine
+        const roll = Math.random();
+        if (roll < 0.08 && (this.inventory.chicken > 0 || this.inventory.cow > 0)) {
+            // 8% chance of a wildlife predator attack
+            if (this.inventory.chicken > 0) {
+                this.inventory.chicken--;
+                updateLog("🦊 WILDLIFE: A red fox snuck into the coop last night! You lost 1 Chicken.");
+            } else {
+                updateLog("🐺 WILDLIFE: Wolves were howling near the pasture, but your fences held them back.");
+            }
+        } else if (roll > 0.92) {
+            // 8% chance of an exceptional growing season or crop bonus
+            const bonusMoney = 400;
+            player.bankBalance += bonusMoney;
+            updateLog(`🍎 HARVEST: Your organic apple orchard had a massive surplus! Sold the yield for +$${bonusMoney}.`);
         }
     }
 };
