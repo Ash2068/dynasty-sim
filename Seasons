@@ -1,22 +1,91 @@
-const SeasonsModule = {
+// ==========================================
+// SEASONS & WEATHER EFFECTS MODULE
+// ==========================================
+
+export const SEASON_DETAILS = {
+    Spring: {
+        name: "Spring",
+        icon: "🌸",
+        description: "Flowers blooming, fresh air, and seasonal allergies."
+    },
+    Summer: {
+        name: "Summer",
+        icon: "☀️",
+        description: "Bright sunny days, beach trips, and intense heat waves."
+    },
+    Autumn: {
+        name: "Autumn",
+        icon: "🍂",
+        description: "Cooler breezes, falling leaves, and cozy sweaters."
+    },
+    Winter: {
+        name: "Winter",
+        icon: "❄️",
+        description: "Freezing temperatures, icy sidewalks, and flu season."
+    }
+};
+
+export const SeasonsModule = {
     currentSeason: "Spring",
     seasons: ["Spring", "Summer", "Autumn", "Winter"],
     
-    updateSeason(age) {
-        // Rotates seasons every age up
-        this.currentSeason = this.seasons[age % 4];
-        this.applySeasonalEffects();
+    // Rotates seasons perfectly every age up based on your math array logic
+    updateSeason(player, updateLog) {
+        this.currentSeason = this.seasons[player.age % 4];
+        this.applySeasonalEffects(player, updateLog);
     },
 
-    applySeasonalEffects() {
+    // Expanded directly from your initial condition checking logic block
+    applySeasonalEffects(player, updateLog) {
         let msg = `The season is now ${this.currentSeason}.`;
+
         if (this.currentSeason === "Winter") {
-            p.health -= 2; // Cold weather risk
+            // Your exact winter health penalty
+            player.stats.health = Math.max(0, player.stats.health - 2); 
             msg += " It's freezing! Health slightly dropped.";
-        } else if (this.currentSeason === "Summer") {
-            p.mental += 5; // Sun boost
+        } 
+        else if (this.currentSeason === "Summer") {
+            // Your exact summer mood boost (mapped to happiness)
+            player.stats.happiness = Math.min(100, player.stats.happiness + 5); 
             msg += " The sun is out! Mental health improved.";
         }
+        else if (this.currentSeason === "Spring") {
+            // Added Spring Loop: 30% chance of an allergy attack impacting health slightly
+            if (Math.random() < 0.30) {
+                player.stats.health = Math.max(0, player.stats.health - 3);
+                msg += " High pollen counts triggered an allergy flare-up! (-3 Health)";
+            } else {
+                msg += " Warm weather returns. Perfect time to go outside.";
+            }
+        }
+        else if (this.currentSeason === "Autumn") {
+            // Added Autumn Loop: Cozy seasonal spending on warm coffee/clothing
+            const clothingCost = 150;
+            player.bankBalance = Math.max(0, player.bankBalance - clothingCost);
+            player.stats.happiness = Math.min(100, player.stats.happiness + 3);
+            msg += ` Cozy autumn winds arrive! You updated your wardrobe. (-$${clothingCost}, +3 Happiness)`;
+        }
+
         updateLog(`🌦️ SEASONS: ${msg}`);
+    },
+
+    // Optional event injector to place inside your yearly loop for surprise weather extremes
+    triggerRandomWeatherAnomaly(player, updateLog) {
+        const roll = Math.random();
+
+        // 5% chance of an extreme environmental spike matching the current active season
+        if (roll < 0.05) {
+            if (this.currentSeason === "Winter") {
+                player.stats.health = Math.max(0, player.stats.health - 10);
+                updateLog("🥶 WEATHER: A historic polar vortex hit your region! Heating bills spiked and you caught a cold. (-10 Health)");
+            } else if (this.currentSeason === "Summer") {
+                player.stats.health = Math.max(0, player.stats.health - 5);
+                updateLog("🥵 WEATHER: An extreme summer heatwave triggered rolling blackouts. (-5 Health)");
+            } else if (this.currentSeason === "Spring") {
+                updateLog("🌧️ WEATHER: Heavy spring downpours flooded your street, keeping you indoors all week.");
+            } else if (this.currentSeason === "Autumn") {
+                updateLog("💨 WEATHER: Beautiful crisp autumn weather makes for excellent park walks.");
+            }
+        }
     }
 };
