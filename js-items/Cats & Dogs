@@ -1,7 +1,105 @@
-const PetModule = {
-    trainPet(index) {
-        const pet = p.relationships.pets[index];
-        pet.bonus += 5;
-        updateLog(`🐾 PETS: ${pet.species} is now better trained!`);
+// ==========================================
+// PET MANAGEMENT MODULE
+// ==========================================
+
+export const PET_SPECIES = {
+    dog: { name: 'Dog', cost: 800, maxAge: 15, baseMaintenance: 200 },
+    cat: { name: 'Cat', cost: 500, maxAge: 18, baseMaintenance: 150 },
+    horse: { name: 'Horse', cost: 5000, maxAge: 25, baseMaintenance: 1200 },
+    exotic: { name: 'Exotic (Tiger Cub)', cost: 25000, maxAge: 12, baseMaintenance: 4000 }
+};
+
+export const PetModule = {
+    // Buy or adopt a brand new pet
+    adoptPet(player, speciesKey, customName, updateLog) {
+        const spec = PET_SPECIES[speciesKey.toLowerCase()];
+        if (!spec) return "Invalid species selection.";
+        if (player.bankBalance < spec.cost) return "You cannot afford this pet.";
+
+        // Initialize relationships array if it doesn't exist yet
+        if (!player.relationships) player.relationships = {};
+        if (!player.relationships.pets) player.relationships.pets = [];
+
+        const newPet = {
+            name: customName || `Little ${spec.name}`,
+            species: speciesKey,
+            age: 0,
+            maxAge: spec.maxAge,
+            relationship: 50, // Starts at neutral 50/100
+            trainingBonus: 0, // Your original 'bonus' tracker
+            maintenance: spec.baseMaintenance
+        };
+
+        player.bankBalance -= spec.cost;
+        player.relationships.pets.push(newPet);
+        
+        updateLog(`🐾 PETS: You adopted a ${spec.name} named ${newPet.name}! (-$${spec.cost.toLocaleString()})`);
+        return true;
+    },
+
+    // Expanded from your initial snippet with randomized progression
+    trainPet(player, index, updateLog) {
+        const pet = player.relationships.pets[index];
+        if (!pet) return "Pet not found.";
+
+        const roll = Math.random();
+        
+        if (roll > 0.15) {
+            pet.trainingBonus += 5;
+            pet.relationship = Math.min(100, pet.relationship + 5);
+            updateLog(`🐾 PETS: You trained ${pet.name} (${pet.species}). They are behaving better! (+5 Training)`);
+        } else {
+            // 15% chance the pet ignores the command or rips up a cushion instead
+            player.stats.happiness = Math.max(0, player.stats.happiness - 5);
+            updateLog(`🐾 PETS: ${pet.name} refused to listen and chewed up your shoe. (-5 Happiness)`);
+        }
+    },
+
+    // Interacting with the pet to secure their relationship value
+    interactWithPet(player, index, action, updateLog) {
+        const pet = player.relationships.pets[index];
+        if (!pet) return;
+
+        if (action === 'play') {
+            pet.relationship = Math.min(100, pet.relationship + 15);
+            player.stats.happiness = Math.min(100, player.stats.happiness + 5);
+            updateLog(`🎾 PETS: You played fetch with ${pet.name}. They love it!`);
+        } else if (action === 'vet') {
+            const vetBill = Math.floor(pet.maintenance * 0.5);
+            player.bankBalance -= vetBill;
+            pet.relationship = Math.min(100, pet.relationship + 20);
+            updateLog(`🩺 PETS: You took ${pet.name} to the vet for a checkup. (-$${vetBill})`);
+        }
+    },
+
+    // Inject this inside your global "Age Up / Next Turn" loop
+    processYearlyPets(player, updateLog) {
+        if (!player.relationships || !player.relationships.pets || player.relationships.pets.length === 0) return;
+
+        // Loop backwards so we can safely filter/splice dead or runaway animals
+        for (let i = player.relationships.pets.length - 1; i >= 0; i--) {
+            const pet = player.relationships.pets[i];
+            
+            pet.age++;
+            player.bankBalance -= pet.maintenance; // Pay yearly food/care fees
+
+            // Relationship decays by 5 every year if neglected
+            pet.relationship = Math.max(0, pet.relationship - 5);
+
+            // Conditional Check 1: Death from Old Age
+            if (pet.age >= pet.maxAge) {
+                player.stats.happiness = Math.max(0, player.stats.happiness - 25); // Grief hit
+                updateLog(`🌈 PETS: Your beloved ${pet.species}, ${pet.name}, passed away at age ${pet.age}. (-25 Happiness)`);
+                player.relationships.pets.splice(i, 1);
+                continue;
+            }
+
+            // Conditional Check 2: Running away due to low relationship
+            if (pet.relationship < 15) {
+                updateLog(`🏃‍♂️ PETS: ${pet.name} ran away from home because they felt neglected!`);
+                player.relationships.pets.splice(i, 1);
+                continue;
+            }
+        }
     }
 };
