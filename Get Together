@@ -1,32 +1,108 @@
-const TogetherModule = {
-    clubs: ["Coders", "Athletes", "Partiers"],
-    activeClub: null,
+// ==========================================
+// TOGETHER: CLUBS & FAMILY MILESTONES MODULE
+// ==========================================
 
-    joinClub(clubName) {
-        this.activeClub = clubName;
-        updateLog(`👥 TOGETHER: Joined the ${clubName} club!`);
+export const CLUB_CONFIGS = {
+    Coders: {
+        id: 'Coders',
+        name: 'The Binary Guild (Coders)',
+        dues: 50,
+        description: 'Late-night hackathons and algorithmic puzzles.'
     },
-
-    processClubBonus() {
-        if (!this.activeClub) return;
-        if (this.activeClub === "Coders") p.smart += 2;
-        if (this.activeClub === "Athletes") p.health += 2;
-        updateLog(`👥 TOGETHER: ${this.activeClub} club activities completed.`);
+    Athletes: {
+        id: 'Athletes',
+        name: 'The Iron Syndicate (Athletes)',
+        dues: 120,
+        description: 'Intense physical regimens, stamina building, and track meets.'
+    },
+    Partiers: {
+        id: 'Partiers',
+        name: 'The Neon Circle (Partiers)',
+        dues: 300, // Nightclub entry fees, drinks, and VIP entry
+        description: 'Vibrant raves, high-stakes networking, and extreme social stamina.'
     }
 };
 
-const FamilyModule = {
+export const TogetherModule = {
+    clubs: ["Coders", "Athletes", "Partiers"],
+    activeClub: null,
+
+    // Directly matches your core club registration logic
+    joinClub(clubName) {
+        if (!this.clubs.includes(clubName)) return "That club does not exist in this city.";
+        
+        this.activeClub = clubName;
+        return `👥 TOGETHER: Joined the ${clubName} club!`;
+    },
+
+    // Formatted and completed out of your original modifier checking loop
+    processClubBonus(player, updateLog) {
+        if (!this.activeClub) return;
+
+        const club = CLUB_CONFIGS[this.activeClub];
+        player.bankBalance -= club.dues; // Subtract yearly club fees
+
+        // 1. Process original bonuses
+        if (this.activeClub === "Coders") {
+            player.stats.smartness = Math.min(100, player.stats.smartness + 2);
+        }
+        if (this.activeClub === "Athletes") {
+            player.stats.health = Math.min(100, player.stats.health + 2);
+        }
+        
+        // 2. Added mechanics for the "Partiers" array option
+        if (this.activeClub === "Partiers") {
+            player.stats.happiness = Math.min(100, player.stats.happiness + 5);
+            player.stats.health = Math.max(0, player.stats.health - 2); // Burning the candle at both ends!
+        }
+
+        updateLog(`👥 TOGETHER: ${club.name} activities completed. Paid $${club.dues} in dues.`);
+    },
+
+    // Allows players to leave their active club safely
+    leaveClub(updateLog) {
+        if (!this.activeClub) return "You aren't a member of any club right now.";
+        const oldClub = this.activeClub;
+        this.activeClub = null;
+        updateLog(`👥 TOGETHER: You resigned your membership from the ${oldClub} club.`);
+        return true;
+    }
+};
+
+export const FamilyModule = {
+    // Expanded milestone array to track rich narratives across full lifetime horizons
     milestones: [
-        { age: 1, text: "Took first steps." },
-        { age: 16, text: "Learned to drive." },
-        { age: 50, text: "Mid-life crisis." }
+        { age: 1,  text: "Took your very first steps across the kitchen floor." },
+        { age: 5,  text: "Lost your first loose tooth and hid it under the pillow." },
+        { age: 12, text: "Graduated from middle school and entered the teenage gauntlet." },
+        { age: 16, text: "Learned to drive and passed your road test safely." },
+        { age: 18, text: "Legally became an adult. The world is yours to conquer." },
+        { age: 30, text: "Looking back at your 20s. Decided to start focusing on investments." },
+        { age: 50, text: "Experiencing a sudden mid-life crisis! Thought about buying a bright red sports car." },
+        { age: 65, text: "Reaching retirement eligibility age. Time to slow down." },
+        { age: 80, text: "Reflecting on your grand legacy surrounded by close memories." }
     ],
 
-    checkMilestones() {
-        const m = this.milestones.find(m => m.age === p.age);
+    // Fixed your exact method signature to properly locate, apply, and scale rewards
+    checkMilestones(player, updateLog) {
+        const m = this.milestones.find(milestone => milestone.age === player.age);
+        
         if (m) {
-            updateLog(`👨‍👩‍👧‍👦 TOGETHER: Milestone Reached - ${m.text}`);
-            p.mental += 10;
+            // Bolsters mental health/happiness metric as requested
+            player.stats.happiness = Math.min(100, player.stats.happiness + 10); 
+            updateLog(`👨‍👩‍👧‍👦 TOGETHER: Milestone Reached - ${m.text} (+10 Happiness)`);
+            return true;
         }
+        
+        return false;
     }
+};
+
+// Universal loop pipeline method wrapper
+export const processYearlySocialCycle = (player, updateLog) => {
+    // Engine Step A: Process recurring active club mechanics
+    TogetherModule.processClubBonus(player, updateLog);
+
+    // Engine Step B: Check lifetime developmental milestones
+    FamilyModule.checkMilestones(player, updateLog);
 };
