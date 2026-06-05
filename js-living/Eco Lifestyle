@@ -1,9 +1,87 @@
-const EcoModule = {
-    footprint: 50, // 0 is Green, 100 is Industrial
+// ==========================================
+// ECOLOGICAL FOOTPRINT MODULE
+// ==========================================
 
-    applyEcoEffects() {
-        if (this.footprint < 30) p.health += 5;
-        if (this.footprint > 70) p.health -= 5;
-        updateLog(`🌱 ECO: Current Footprint is ${this.footprint > 50 ? 'Industrial' : 'Green'}.`);
+export const ECO_CHOICES = {
+    solarPanels: {
+        label: 'solarPanels',
+        name: 'Install Solar Roof Panels',
+        cost: 8500,
+        footprintImpact: -15,
+        yearlySavings: 600,
+        description: 'Power your home using clean, renewable energy.'
+    },
+    electricVehicle: {
+        label: 'electricVehicle',
+        name: 'Buy Electric Vehicle',
+        cost: 45000,
+        footprintImpact: -20,
+        yearlySavings: 1200,
+        description: 'Swap gas emissions for a lithium-powered ride.'
+    },
+    coalInvestment: {
+        label: 'coalInvestment',
+        name: 'Invest in Industrial Factory',
+        cost: 30000,
+        footprintImpact: 35,
+        yearlySavings: 15000, // Highly profitable but highly destructive
+        description: 'Buy shares in heavy manufacturing plants.'
+    }
+};
+
+export const EcoModule = {
+    footprint: 50, // 0 is pristine green, 100 is heavy industrial polluter
+    activeUpgrades: [],
+
+    // Purchase eco-friendly upgrades or industrial projects
+    buyEcoProject(player, choiceKey, updateLog) {
+        const project = ECO_CHOICES[choiceKey];
+        if (!project) return "Invalid selection choice.";
+        if (player.bankBalance < project.cost) return "You cannot afford this investment.";
+        if (this.activeUpgrades.includes(choiceKey)) return "You have already completed this project.";
+
+        player.bankBalance -= project.cost;
+        this.activeUpgrades.push(choiceKey);
+        this.footprint = Math.max(0, Math.min(100, this.footprint + project.footprintImpact));
+
+        updateLog(`🌱 ECO: Purchased "${project.name}". Your footprint shifted by ${project.footprintImpact}.`);
+        return true;
+    },
+
+    // Formatted and built directly out of your original health verification snippet
+    applyEcoEffects(player, updateLog) {
+        // Keeps your exact core verification logic
+        if (this.footprint < 30) {
+            player.stats.health = Math.min(100, player.stats.health + 5);
+        }
+        if (this.footprint > 70) {
+            player.stats.health = Math.max(0, player.stats.health - 5);
+        }
+
+        // Clean text formatting matching your exact ternary evaluation logic template
+        updateLog(`🌱 ECO: Current Footprint is ${this.footprint > 50 ? 'Industrial' : 'Green'}. (${this.footprint}/100)`);
+    },
+
+    // Connect this to your master update clock loop
+    processYearlyEcoCycle(player, updateLog) {
+        // 1. Process recurring financial adjustments from active upgrades
+        this.activeUpgrades.forEach(key => {
+            const project = ECO_CHOICES[key];
+            player.bankBalance += project.yearlySavings; // Can be negative for upkeep, positive for payouts
+        });
+
+        // 2. Trigger original health conditions evaluation block
+        this.applyEcoEffects(player, updateLog);
+
+        // 3. Dynamic Carbon Taxing & Community Status Quirks
+        if (this.footprint > 80) {
+            const carbonTax = 2500;
+            player.bankBalance -= carbonTax;
+            player.stats.happiness = Math.max(0, player.stats.happiness - 8);
+            updateLog(`🛑 ENVIRONMENT: Activists are protesting outside your properties due to your high industrial emissions! Charged a $${carbonTax} Carbon Tax.`);
+        } else if (this.footprint < 20) {
+            player.stats.happiness = Math.min(100, player.stats.happiness + 5);
+            updateLog(`✨ ECO: You received an Eco-Citizen Award for keeping a pristine green footprint! (+5 Happiness)`);
+        }
     }
 };
