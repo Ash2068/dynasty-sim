@@ -1,10 +1,101 @@
-const CityModule = {
-    rent: 1200,
+// ==========================================
+// CITY & HOUSING SYSTEM MODULE
+// ==========================================
 
-    payRent() {
-        if (p.age >= 18 && !p.isMarried) {
-            p.money -= this.rent;
-            updateLog(`🏙️ CITY: Paid $${this.rent} for your studio apartment.`);
+export const CITY_DISTRICTS = {
+    suburbs: {
+        id: 'suburbs',
+        name: 'The Suburbs',
+        rent: 800,
+        description: 'Quiet, affordable, but far away from nightlife.',
+        happinessBonus: 2
+    },
+    downtown: {
+        id: 'downtown',
+        name: 'Downtown Studio',
+        rent: 1200, // Matches your original base config
+        description: 'Right in the action. Loud, busy, and trendy.',
+        happinessBonus: 5
+    },
+    luxury: {
+        id: 'luxury',
+        name: 'Penthouse District',
+        rent: 3500,
+        description: 'High-class living with a private skyline view.',
+        happinessBonus: 12
+    }
+};
+
+export const CityModule = {
+    // Current housing state defaults
+    currentDistrict: 'downtown',
+    missedRentMonths: 0,
+
+    // Change neighborhoods/apartments
+    moveDistrict(player, districtKey, updateLog) {
+        const target = CITY_DISTRICTS[districtKey.toLowerCase()];
+        if (!target) return "Invalid city district selection.";
+        
+        this.currentDistrict = districtKey.toLowerCase();
+        updateLog(`🚚 CITY: You signed a new lease and moved into a ${target.name}!`);
+        return true;
+    },
+
+    // Expanded from your snippet with validation checks, marriage states, and eviction loops
+    payRent(player, updateLog) {
+        // Only charge rent if player is an adult (>= 18) and not married 
+        // (Assuming if married, housing costs shift to your relationship module)
+        if (player.age < 18 || player.isMarried) return;
+
+        const currentApartment = CITY_DISTRICTS[this.currentDistrict];
+        const rentBill = currentApartment.rent;
+
+        if (player.bankBalance >= rentBill) {
+            // Player successfully pays rent
+            player.bankBalance -= rentBill;
+            player.stats.happiness = Math.min(100, player.stats.happiness + currentApartment.happinessBonus);
+            
+            // Reset eviction counter if they paid their dues
+            this.missedRentMonths = 0; 
+            
+            updateLog(`🏙️ CITY: Paid $${rentBill.toLocaleString()} for your ${currentApartment.name}.`);
+        } else {
+            // Player cannot afford rent: Eviction progression triggers
+            this.missedRentMonths++;
+            player.stats.happiness = Math.max(0, player.stats.happiness - 20);
+
+            if (this.missedRentMonths >= 2) {
+                // EVICTED! Forced down to lowest tier housing automatically
+                this.currentDistrict = 'suburbs';
+                this.missedRentMonths = 0;
+                
+                // Penalty fine for breaking lease terms
+                const penalty = 500;
+                player.bankBalance -= penalty; 
+                
+                updateLog(`🚨 EVICTION: You were evicted for non-payment! Forced to move to ${CITY_DISTRICTS.suburbs.name} and charged a $${penalty} fine.`);
+            } else {
+                updateLog(`⚠️ WARNING: You couldn't afford your $${rentBill} rent! You are facing eviction next cycle.`);
+            }
+        }
+    },
+
+    // Optional loop connector to process random urban neighborhood events
+    processYearlyCityEvents(player, updateLog) {
+        if (player.age < 18) return;
+
+        // Run your base rent collector logic automatically
+        this.payRent(player, updateLog);
+
+        // Random urban event simulation
+        const roll = Math.random();
+        if (roll < 0.10) {
+            // 10% chance of random market fluctuations
+            const fluctuation = Math.random() > 0.5 ? 50 : -50;
+            CITY_DISTRICTS[this.currentDistrict].rent += fluctuation;
+            
+            const direction = fluctuation > 0 ? "increased" : "decreased";
+            updateLog(`📈 MARKET: Local real estate trends shifted. Your rent ${direction} by $${Math.abs(fluctuation)}.`);
         }
     }
 };
