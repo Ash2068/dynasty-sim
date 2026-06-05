@@ -1,13 +1,100 @@
-const IslandLivingModule = {
+// ==========================================
+// ISLAND LIVING & GEOGRAPHY MODULE
+// ==========================================
+
+export const ISLAND_PROPERTIES = {
+    beachShack: {
+        id: 'beachShack',
+        name: 'Rustic Beachfront Shack',
+        cost: 45000,
+        maintenance: 150,
+        happinessBonus: 8,
+        description: 'Right on the sand. Beautiful views, but completely unprotected from high tide.'
+    },
+    privateAtoll: {
+        id: 'privateAtoll',
+        name: 'Private Luxury Atoll Villa',
+        cost: 1500000,
+        maintenance: 6500,
+        happinessBonus: 25,
+        description: 'An elite, secluded sanctuary with a private dock and crystal clear lagoons.'
+    }
+};
+
+export const IslandLivingModule = {
+    ownedIslandProperty: null,
+
+    // Your original country matching system, scaled to include more territories
     isIsland(country) {
-        const islands = ["Japan", "UK", "Philippines", "Iceland"];
+        const islands = ["Japan", "UK", "Philippines", "Iceland", "Maldives", "New Zealand", "Madagascar"];
         return islands.includes(country);
     },
 
-    triggerIslandEvent() {
-        if (Math.random() < 0.1) {
-            updateLog("🏝️ ISLAND: You spent the day spear-fishing. (+5 Health)");
-            p.health = Math.min(100, p.health + 5);
+    // Expanded directly from your initial core event function
+    triggerIslandEvent(player, updateLog) {
+        const roll = Math.random();
+        
+        // 10% chance to trigger your original spear-fishing event
+        if (roll < 0.10) {
+            player.stats.health = Math.min(100, player.stats.health + 5);
+            updateLog("🏝️ ISLAND: You spent the day spear-fishing in the coral reefs. (+5 Health)");
+            return true;
+        }
+        
+        // 5% chance to find a washed-up beach treasure
+        if (roll >= 0.10 && roll < 0.15) {
+            const treasureValue = Math.floor(Math.random() * 800) + 200;
+            player.bankBalance += treasureValue;
+            updateLog(`🐚 ISLAND: You found an intact, rare nautilus shell washed up on the beach! Sold it to a collector for +$${treasureValue}.`);
+            return true;
+        }
+
+        return false;
+    },
+
+    // Purchase properties exclusive to island nations
+    buyIslandProperty(player, propertyKey, updateLog) {
+        if (!this.isIsland(player.currentCountry)) {
+            return "❌ You can only purchase beachfront properties if you currently live in an island nation!";
+        }
+
+        const property = ISLAND_PROPERTIES[propertyKey];
+        if (!property) return "Invalid property type.";
+        if (player.bankBalance < property.cost) return "You do not have enough funds for this property.";
+
+        player.bankBalance -= property.cost;
+        this.ownedIslandProperty = propertyKey;
+        updateLog(`🏝️ REAL ESTATE: You purchased a ${property.name}! (-$${property.cost.toLocaleString()})`);
+        return true;
+    },
+
+    // Insert this directly inside your master yearly time progression step
+    processYearlyIslandLife(player, updateLog) {
+        if (!this.isIsland(player.currentCountry)) return;
+
+        // 1. Fire off your native island activity generator
+        this.triggerIslandEvent(player, updateLog);
+
+        // 2. Handle property expenses and happiness yields if they own island real estate
+        if (this.ownedIslandProperty) {
+            const prop = ISLAND_PROPERTIES[this.ownedIslandProperty];
+            player.bankBalance -= prop.maintenance;
+            player.stats.happiness = Math.min(100, player.stats.happiness + prop.happinessBonus);
+        }
+
+        // 3. Island Specific Weather/Risk Mechanics
+        const weatherRoll = Math.random();
+        if (weatherRoll < 0.07) {
+            // 7% chance of a major tropical storm / monsoon season hitting
+            player.stats.happiness = Math.max(0, player.stats.happiness - 12);
+            
+            if (this.ownedIslandProperty === 'beachShack') {
+                const repairCost = 3000;
+                player.bankBalance -= repairCost;
+                updateLog(`⛈️ MONSOON: A tropical storm battered the coast! Your Beach Shack suffered water damage. Repair costs: -$${repairCost}.`);
+            } else {
+                updateLog("⛈️ MONSOON: Heavy typhoons hit the coast, but you safely watched the storm pass from inside your home.");
+            }
         }
     }
 };
