@@ -1,0 +1,14 @@
+const FamousModule = {
+    updateFameLevel() {
+        if (p.fame > 90) return "Global Superstar";
+        if (p.fame > 50) return "B-List Celebrity";
+        return "Unknown";
+    },
+
+    checkQuirks() {
+        if (p.fame > 70 && Math.random() < 0.1) {
+            p.mental = Math.max(0, p.mental - 10);
+            updateLog("🌟 FAMOUS: The paparazzi are stalking you. (-10 Mental)");
+        }
+    }
+};
