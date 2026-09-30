@@ -26,6 +26,18 @@ const PET_SPECIES = {
         for (let i = p.relationships.pets.length - 1; i >= 0; i--) {
             const pet = p.relationships.pets[i];
             pet.age++;
-            if (!pet.familyPet) p.money -= pet.maintenance;
+             if (!pet.familyPet) p.money -= pet.maintenance;
             pet.relationship = Math.max(0, pet.relationship - 5);
             if (pet.age >= pet.maxAge) {
+                p.mental = Math.max(0, p.mental - 25);
+                updateLog(`🌈 PETS: Your beloved ${pet.species}, ${pet.name}, passed away at age ${pet.age}. (-25 Mental)`);
+                p.relationships.pets.splice(i, 1);
+                continue;
+            }
+            if (pet.relationship < 15) {
+                updateLog(`🏃 PETS: ${pet.name} ran away from home because they felt neglected!`);
+                p.relationships.pets.splice(i, 1);
+            }
+        }
+    }
+};
