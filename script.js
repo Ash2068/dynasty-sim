@@ -1459,7 +1459,20 @@ function ageUp() {
         });
     }
     // --- EXPANSION PACK HOOKS ---
-    if (typeof SeasonsModule !== 'undefined') SeasonsModule.updateSeason(p.age);
+     if (typeof SeasonsModule !== 'undefined') SeasonsModule.updateSeason(p.age);
+    if (typeof FamilyModule !== 'undefined') FamilyModule.checkMilestones();
+    if (typeof TogetherModule !== 'undefined') TogetherModule.processClubBonus();
+    if (typeof WorkModule !== 'undefined') WorkModule.triggerWorkEvent();
+    if (typeof FamousModule !== 'undefined') FamousModule.checkQuirks();
+    if (typeof EcoModule !== 'undefined') EcoModule.applyEcoEffects();
+    if (typeof CottageModule !== 'undefined') CottageModule.collectMilk();
+    if (typeof CityModule !== 'undefined') CityModule.payRent();
+    if (typeof IslandLivingModule !== 'undefined' && IslandLivingModule.isIsland(p.country)) {
+        IslandLivingModule.triggerIslandEvent();
+    }
+    if (typeof PetModule !== 'undefined') PetModule.processYearlyPets();
+    if (p.isBreakdown) {
+        handleBreakdownTurn();
     } else {
         processStandardYear();
     }
@@ -1535,9 +1548,24 @@ function processStandardYear() {
             updateLog(`CAREER: You are eligible to apply for promotion to ${p.job.promotesTo}.`);
         }
     }
-     if (p.age === 18) {
+    if (p.age === 18) {
         updateLog("GRADUATION: Careers and Fame are now available.");
         refreshJobBoard();
+    }
+    if (p.age > 3 && Math.random() < 0.20 && typeof triggerRandomEvent !== 'undefined') {
+        triggerRandomEvent();
+    }
+}
+function handleBreakdownTurn() {
+    p.breakdownTimer--;
+    const weird = ["You stared at a wall all day.", "You spent $200 on magic beans.", "You forgot your own name."];
+    updateLog(`[DISORDER] ${weird[Math.floor(Math.random() * weird.length)]}`);
+    if (p.breakdownTimer <= 0) {
+        p.isBreakdown = false;
+        p.mental = 20;
+        updateLog("RECOVERY: You have regained control.");
+    }
+}
 // --- 5. SOCIAL & CAREER ACTIONS ---
 function study() {
     if (!p.school || !p.school.enrolled || p.age < 5) {
@@ -1546,15 +1574,23 @@ function study() {
     }
     p.smart = Math.min(100, p.smart + 3);
     p.mental = Math.max(0, p.mental - 8);
-     updateLog("You studied harder. (+Smart, -Mental)");
+        updateLog("You studied harder. (+Smart, -Mental)");
     updateUI();
     save();
 }
 function seekTherapy(tier) {
+    const cost = tier === 'cheap' ? 500 : 5000;
+    if (p.money < cost) { updateLog("Insufficient funds."); return; }
+    p.money -= cost;
+    p.mental = Math.min(100, p.mental + (tier === 'cheap' ? 15 : 50));
+    updateLog(`Therapy successful. (+Mental)`);
+    updateUI();
+}
+function refreshJobBoard() {
     const board = document.getElementById('job-board');
     if (!board) return;
     board.innerHTML = "";
-     const groups = [
+       const groups = [
         { title: "Part-time jobs (age 13+)", jobs: jobList.map((job, index) => ({ job, index })).filter(item => item.job.workType === "part-time") },
         { title: "Careers (age 18+)", jobs: jobList.map((job, index) => ({ job, index })).filter(item => !item.job.workType) },
         { title: "Corporate careers and promotions", jobs: jobList.map((job, index) => ({ job, index })).filter(item => item.job.workType === "corporate") },
@@ -1960,7 +1996,7 @@ function isCareerApplicationEligible(job) {
     return true;
 }
 function applyJob(i) {
-    const job = jobList[i];
+     const job = jobList[i];
     if (!job) return;
     const minimumAge = Number.isFinite(job.ageRequirement)
         ? job.ageRequirement
@@ -2070,9 +2106,23 @@ function startMilitaryService(job) {
     save();
 }
 function findDate() {
+    if (p.age < 16) { updateLog("You're too young to date."); return; }
+    const roll = Math.random();
+    if (roll < 0.4) {
+        const partnerName = ["Alex", "Sam", "Jordan", "Riley", "Morgan"][Math.floor(Math.random() * 5)];
+        p.relationships.family.push({ name: `Partner (${partnerName})`, rel: 60, type: "Partner" });
+        updateLog(`💘 DATING: You hit it off with ${partnerName}!`);
+    } else if (roll < 0.7) {
+        updateLog("💘 DATING: You went on a nice date, but there was no spark.");
+    } else {
+        p.mental = Math.max(0, p.mental - 5);
+        updateLog("💔 DATING: You got stood up. (-5 Mental)");
+    }
+    renderFamily();
+    updateUI();
 }
 function adoptPet(i) {
-    const key = ['dog', 'cat', 'fish'][i];
+       const key = ['dog', 'cat', 'fish'][i];
     if (typeof PetModule === 'undefined') return;
     PetModule.adoptPet(key);
     renderPets();
@@ -2085,19 +2135,24 @@ function postSocial(type) {
     const effects = {
         funny:     { fameMin: 1,  fameMax: 4, mental: 2,  label: "🤡 You posted a meme." },
         aesthetic: { fameMin: 2,  fameMax: 6, mental: 1,  label: "📸 You posted a selfie." },
+        rant:      { fameMin: -2, fameMax: 5, mental: -3, label: "🗯️ You went on a rant." },
+        scroll:    { fameMin: 0,  fameMax: 0, mental: -2, label: "🌊 You doomscrolled for hours." }
+    };
+    const e = effects[type];
     if (!e) return;
     const fameDelta = Math.floor(Math.random() * (e.fameMax - e.fameMin + 1)) + e.fameMin;
     p.fame = Math.max(0, Math.min(100, p.fame + fameDelta));
     const followerGain = type === "scroll" ? 0 : Math.max(5, Math.floor((p.fame + 1) * (1 + Math.random() * 4)));
     p.followers += followerGain;
     p.mental = Math.max(0, Math.min(100, p.mental + e.mental));
-     updateLog(`${e.label} (${fameDelta >= 0 ? '+' : ''}${fameDelta} Fame, +${followerGain} followers)`);
+    updateLog(`${e.label} (${fameDelta >= 0 ? '+' : ''}${fameDelta} Fame, +${followerGain} followers)`);
     updateUI();
 }
+function renderFamily() {
     const el = document.getElementById('list-family');
     if (!el) return;
     const fam = (p.relationships && p.relationships.family) || [];
-         const background = document.getElementById('family-background');
+       const background = document.getElementById('family-background');
     if (background) {
         const parentCount = fam.filter(member => member.type === "Parent").length;
         const legacyDescription = parentCount >= 2
@@ -2116,10 +2171,11 @@ function postSocial(type) {
     }).join('')
         || '<p style="color:#666;">No family connections yet.</p>';
 }
+function renderPets() {
     const el = document.getElementById('list-pets');
     if (!el) return;
     const pets = (p.relationships && p.relationships.pets) || [];
-    el.innerHTML = pets.map((pet, i) => {
+        el.innerHTML = pets.map((pet, i) => {
         const kind = pet.familyPet ? "family pet" : "pet";
         const actions = pet.species === "fish"
             ? `<button class="btn-ghost" onclick="PetModule.interactWithPet(${i}, 'feed')">🍽️ Feed</button>
@@ -2130,28 +2186,70 @@ function postSocial(type) {
         <div class="sub-box">
                     ${pet.name} (${pet.species} ${kind}, age ${pet.age}) — Bond: ${pet.relationship}
             <div style="display:flex; gap:8px; margin-top:6px;">
-                            ${actions}
+                           ${actions}
             </div>
-               </div>`;
+                    </div>`;
     }).join('') || '<p style="color:#666;">No pets yet.</p>';
 }
 function renderArchive() {
+    const aEl = document.getElementById('archive-list');
+    const gEl = document.getElementById('graveyard-list');
+    if (aEl) aEl.innerHTML = archive.map(a => `<div>${a.name}</div>`).join('')
+        || '<p style="color:#666;">No archived dynasties yet.</p>';
+    if (gEl) gEl.innerHTML = graveyard.map(g => `<div>🪦 ${g.name} — Age ${g.age} — ${g.summary}</div>`).join('')
+        || '<p style="color:#666;">The graveyard is empty... for now.</p>';
+}
+// --- 6. ARCHIVE & DEATH ---
+function die() {
+    let tax = 0.2; 
+    if (typeof RoyaltyModule !== 'undefined') tax = RoyaltyModule.getInheritanceTax();
+    
+    const legacyMoney = Math.floor(p.money * (1 - tax));
+    const title = (typeof RoyaltyModule !== 'undefined') ? RoyaltyModule.checkTitle() : "Citizen";
+    graveyard.push({ name: p.name, age: p.age, summary: `${title} - ${p.job ? p.job.title : "Unemployed"}` });
+    localStorage.setItem('dynasty_graveyard', JSON.stringify(graveyard));
+    localStorage.setItem('pending_inheritance', legacyMoney);
+    
+    alert(`Rest in Peace, ${p.name}. You lived to be ${p.age}. Inheritance for next life: $${legacyMoney.toLocaleString()}`);
+        localStorage.removeItem('dynasty_current');
+    location.reload();
+}
+// --- 7. UI & NAVIGATION UTILS ---
+function showTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+    const target = document.getElementById(`tab-${tabId}`);
+    if (target) target.style.display = 'block';
+}
+function updateLog(msg) {
+    const log = document.getElementById('log');
+    if(log) {
+        log.innerHTML += `<div>> ${msg}</div>`;
+        log.scrollTop = log.scrollHeight;
+    }
 }
 function updateUI() {
-    if (!Number.isFinite(p.followers)) p.followers = 0;
+        if (!Number.isFinite(p.followers)) p.followers = 0;
     const isDoctor = p.school && Array.isArray(p.school.advancedDegrees) &&
         (p.school.advancedDegrees.includes("Dental School") || p.school.advancedDegrees.includes("Medical School"));
     document.getElementById('char-name').innerText = `${isDoctor ? "Dr. " : ""}${p.name}`;
     document.getElementById('val-money').innerText = p.money.toLocaleString();
     document.getElementById('val-age').innerText = p.age;
     
+    let standing = "Infant";
+    if (p.age >= 3) standing = "Toddler";
+    if (p.age >= 6) standing = "Child";
+    if (p.age >= 13) standing = "Teenager";
+    if (p.age >= 18) standing = "Adult";
+    if (p.age >= 65) standing = "Senior";
+    document.getElementById('char-standing').innerText = standing;
+    document.getElementById('bar-health').style.width = p.health + "%";
     document.getElementById('bar-mental').style.width = p.mental + "%";
     document.getElementById('bar-smart').style.width = p.smart + "%";
     document.getElementById('bar-looks').style.width = p.looks + "%";
     const popularity = document.getElementById('popularity-stat');
     if (popularity) popularity.style.display = p.age >= 5 && p.school && p.school.enrolled ? 'block' : 'none';
     const jobSect = document.getElementById('job-section');
-     if (jobSect) jobSect.style.display = p.age >= 13 ? 'block' : 'none';
+        if (jobSect) jobSect.style.display = p.age >= 13 ? 'block' : 'none';
     if (p.age >= 13) {
         refreshJobBoard();
         const currentJob = document.getElementById("current-job-info");
@@ -2164,8 +2262,10 @@ function updateUI() {
     renderPets();
     renderSchool();
     renderSchoolActivities();
-    if (p.age >= 13) {
+        if (p.age >= 13) {
         const smSect = document.getElementById('social-media-section');
+        const fameCont = document.getElementById('fame-container');
+        if(smSect) smSect.style.display = 'block';
         if(fameCont) {
             fameCont.style.display = 'block';
             document.getElementById('bar-fame').style.width = p.fame + "%";
@@ -2179,12 +2279,24 @@ function showUI(type) {
     const setup = document.getElementById('setup-screen');
     const settings = document.getElementById('settings-screen');
     const main = document.getElementById('main-ui');
-    if (home && setup && settings && main) {
+       if (home && setup && settings && main) {
         home.style.display = type === 'home' ? 'block' : 'none';
         setup.style.display = type === 'setup' ? 'block' : 'none';
         settings.style.display = type === 'settings' ? 'block' : 'none';
         main.style.display = type === 'main' ? 'block' : 'none';
     }
+    }
+// --- 8. SYSTEM ACTIONS ---
+function save() { 
+    localStorage.setItem('dynasty_current', JSON.stringify(p)); 
+}
+function checkMentalHealth() { 
+    if (p.mental <= 0) { 
+        p.isBreakdown = true; 
+        p.breakdownTimer = 5; 
+        p.job = null; 
+        updateLog("CRITICAL: You have suffered a mental breakdown.");
+    } 
 }
 function openArchive() { renderArchive(); document.getElementById('archive-modal').style.display = 'flex'; }
 function closeArchive() { document.getElementById('archive-modal').style.display = 'none'; }
@@ -2194,7 +2306,18 @@ function saveSettings() {
 }
 // --- 9. GLOBAL HOME BUTTON LOGIC ---
 window.exitToHome = function() {
-     const confirmExit = localStorage.getItem('dynasty_confirm_exit') !== 'false';
+        const confirmExit = localStorage.getItem('dynasty_confirm_exit') !== 'false';
     if (!confirmExit || confirm("Return to the main menu? Your current life will end.")) {
         // 1. Perform a final save
         save(); 
+            // 2. Triple-Clear the session
+        localStorage.removeItem('dynasty_current');
+        localStorage.setItem('dynasty_current', 'null'); 
+        
+        console.log("Session cleared. Redirecting to clean state...");
+        // 3. Force the browser to a clean URL without any cached data
+        // This adds a unique timestamp so the browser can't "remember" the old page state
+        const cleanPath = window.location.origin + window.location.pathname;
+        window.location.replace(cleanPath + "?refresh=" + Date.now());
+    }
+};
