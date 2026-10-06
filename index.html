@@ -7,7 +7,9 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <div id="game-container">
+
     <div id="home-screen" style="display:none;">
         <h1>DYNASTY &amp; DISCORD</h1>
         <p class="home-description">Build a new dynasty, change your settings, or revisit past lives.</p>
@@ -17,15 +19,17 @@
             <button class="btn-ghost" onclick="openArchive()">📜 ARCHIVE LIFE</button>
         </div>
     </div>
+
     <div id="setup-screen">
         <h1>DYNASTY & DISCORD</h1>
-                <button class="btn-ghost back-button" onclick="showUI('home')">← BACK TO MENU</button>
+        <button class="btn-ghost back-button" onclick="showUI('home')">← BACK TO MENU</button>
         
         <div class="sub-box">
             <label>Full Name</label>
             <input type="text" id="input-name" class="btn-ghost" placeholder="Enter Name...">
             <button class="btn-ghost" onclick="rollStats()">🎲 Random Identity</button>
         </div>
+
         <div class="sub-box">
             <label>Bio-Metrics</label>
             <select id="input-gender" class="btn-ghost">
@@ -55,6 +59,7 @@
         
         <button class="btn-main" onclick="finalizeLife()">BEGIN LIFE</button>
     </div>
+
     <div id="settings-screen" style="display:none;">
         <h1>SETTINGS</h1>
         <div class="sub-box">
@@ -66,35 +71,42 @@
         </div>
         <button class="btn-main" onclick="showUI('home')">BACK TO MENU</button>
     </div>
+
     <div id="main-ui" style="display:none;">
         <div class="header">
             <button class="btn-ghost" onclick="exitToHome()">🏠</button>
             <h1 id="char-name">Loading...</h1>
             <div class="money-display">$<span id="val-money">0</span></div>
         </div>
+
         <div class="info-row">
             Age: <span id="val-age">0</span> | <span id="char-standing">Infant</span>
         </div>
+
         <div class="stats-grid">
             <div class="stat-box"><label>Health</label><div class="bar-bg"><div id="bar-health" class="bar-fill" style="background:var(--success); width:100%;"></div></div></div>
             <div class="stat-box"><label>Mental</label><div class="bar-bg"><div id="bar-mental" class="bar-fill" style="background:var(--accent); width:100%;"></div></div></div>
             <div class="stat-box"><label>Smart</label><div class="bar-bg"><div id="bar-smart" class="bar-fill" style="background:#a855f7; width:50%;"></div></div></div>
             <div class="stat-box"><label>Looks</label><div class="bar-bg"><div id="bar-looks" class="bar-fill" style="background:#ec4899; width:50%;"></div></div></div>
         </div>
+
         <div id="fame-container" style="display:none;" class="stat-box">
             <label>Fame</label>
             <div class="bar-bg"><div id="bar-fame" class="bar-fill" style="background:var(--fame); width:0%;"></div></div>
         </div>
+
         <div class="tab-nav">
             <button onclick="showTab('main')">Life</button>
             <button onclick="showTab('social')">Social</button>
             <button onclick="showTab('active')">Action</button>
             <button onclick="showTab('assets')">Assets</button>
         </div>
+
         <div id="tab-main" class="tab-content">
             <div id="log">Welcome to the world...</div>
             <button class="btn-main" style="margin-top:15px;" onclick="ageUp()">AGE UP (+1 Year)</button>
         </div>
+
         <div id="tab-social" class="tab-content" style="display:none;">
             <div class="sub-box">
                 <h3>Family & Romance</h3>
@@ -102,7 +114,8 @@
                 <div id="family-background" class="family-background"></div>
                 <div id="list-family"></div>
             </div>
-            </div>
+        </div>
+
         <div id="tab-active" class="tab-content" style="display:none;">
             <div id="social-media-section" class="sub-box" style="display:none; border-color:var(--fame);">
                 <h3 style="color:var(--fame);">📱 SMARTPHONE</h3>
@@ -157,7 +170,7 @@
                 </div>
             </div>
             <div id="job-section" class="sub-box" style="display:none;">
-                 <h3>Work &amp; Career</h3>
+                <h3>Work &amp; Career</h3>
                 <p class="school-option-status">Part-time jobs and freelance gigs open at age 13. Most full-time careers require age 18 and a high-school diploma or GED; specialized roles may require further study, licenses, or experience. Pay depends on your country, education, skills, and work performance.</p>
                 <div id="current-job-info">Unemployed</div>
                 <div id="career-actions"></div>
@@ -171,8 +184,9 @@
                 <button class="btn-ghost" onclick="seekTherapy('expensive')">🏥 Psychiatrist ($5,000)</button>
             </div>
         </div>
+
         <div id="tab-assets" class="tab-content" style="display:none;">
-             <div class="sub-box">
+            <div class="sub-box">
                 <h3>Pets</h3>
                 <p class="asset-description">Adopt a companion for your family.</p>
                 <div id="pet-shop" class="pet-shop">
@@ -189,6 +203,7 @@
         </div>
     </div>
 </div>
+
 <div id="choice-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; justify-content:center; align-items:center; padding: 20px;">
     <div class="sub-box" style="background:#1a1a1a; max-width:400px; width:100%; text-align:center; border:2px solid var(--accent); padding: 20px;">
         <h2 id="event-title" style="color:var(--accent); margin-bottom:10px;">Event</h2>
@@ -196,6 +211,7 @@
         <div id="event-choices" style="display:flex; flex-direction:column; gap:12px;"></div>
     </div>
 </div>
+
 <div id="archive-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; justify-content:center; align-items:center;">
     <div id="game-container" style="max-height: 90vh; overflow-y: auto; border: 2px solid var(--accent);">
         <h2 style="color:var(--accent); text-align:center;">📜 WORLD ARCHIVES</h2>
@@ -207,6 +223,7 @@
         <button class="btn-main" onclick="closeArchive()">CLOSE</button>
     </div>
 </div>
+
 <script src="seasons.js"></script>
 <script src="royalty.js"></script>
 <script src="get-together.js"></script>
@@ -220,5 +237,6 @@
 <script src="growing-together.js"></script>
 <script src="school-life.js"></script>
 <script src="script.js"></script>
+
 </body>
 </html>
